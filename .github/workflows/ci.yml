@@ -1,0 +1,81 @@
+# CI gate. The reference repo (multimodal-toolkit) had no CI at all, which is
+# how its two provenance implementations drifted apart unnoticed.
+#
+# Deliberately installs only the core + dev extras. The [suite2p] extra pulls
+# torch, cellpose, and a scanimage-tiff-reader that builds from source on any
+# modern Python; making CI pay that on every push would be minutes per run for a
+# dependency most changes never touch.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_FROZEN: "1"
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      # Reads .python-version, so CI and local development cannot diverge.
+      - name: Install Python
+        run: uv python install
+
+      # --frozen fails if uv.lock disagrees with pyproject.toml, which is the
+      # same invariant verify-uv-environment checks locally.
+      - name: Sync dependencies
+        run: uv sync --extra dev --frozen
+
+      - name: Lint
+        run: uv run ruff check . --output-format=github
+
+      - name: Format check
+        run: uv run ruff format --check .
+
+      - name: Type check
+        run: uv run mypy src
+
+      - name: Tests
+        run: uv run pytest --cov=calcium2p --cov-report=term-missing
+
+  commit-messages:
+    # Conventional Commits is only useful if it is actually enforced -- the
+    # format is what release tooling parses out of history.
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check commit subjects
+        run: |
+          pattern='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9._/-]+\))?!?: .+'
+          failed=0
+          while read -r sha subject; do
+            if ! printf '%s' "$subject" | grep -qE "$pattern"; then
+              echo "::error::Not Conventional Commits: $sha $subject"
+              failed=1
+            fi
+            if [ "${#subject}" -gt 72 ]; then
+              echo "::error::Subject exceeds 72 chars: $sha $subject"
+              failed=1
+            fi
+          done < <(git log --format='%H %s' origin/${{ github.base_ref }}..HEAD)
+          exit $failed
+

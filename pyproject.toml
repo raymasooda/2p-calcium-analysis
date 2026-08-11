@@ -1,0 +1,196 @@
+[project]
+name = "calcium2p"
+version = "0.1.0"
+description = "Two-photon calcium imaging analysis: trace processing, event detection, and behaviour alignment."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "MIT" }
+authors = [{ name = "Ruten Neuro" }]
+
+# Every pin carries an upper bound. Without one, `uv sync` on a fresh machine can
+# resolve to a future major that breaks this code. Each bound below is the
+# smallest KNOWN-broken boundary, with the reason stated -- widen only after testing.
+dependencies = [
+    # <2.5 mirrors numba's own ceiling (numba 0.66 requires numpy<2.5). Keeping the
+    # core in step with it means the optional [suite2p] extra stays resolvable.
+    "numpy>=1.26,<2.5",
+    # 1.14 REMOVED scipy.integrate.trapz (-> trapezoid). The predecessor repo used
+    # trapz; we target the post-removal API deliberately so ports get fixed, not pinned around.
+    "scipy>=1.14,<2.0",
+    # 2.0 REMOVED DataFrame.iteritems and renamed value_counts() output to "count".
+    # Both bit the predecessor repo; targeting >=2.2 forces the corrected idioms.
+    "pandas>=2.2,<3.0",
+    # 3.9 REMOVED cm.get_cmap (-> matplotlib.colormaps[...]). Same rationale.
+    "matplotlib>=3.9,<4.0",
+    # 0.13 deprecated sns.set() in favour of sns.set_theme().
+    "seaborn>=0.13,<1.0",
+    "scikit-image>=0.24,<1.0",
+    "scikit-learn>=1.5,<2.0",
+    "statsmodels>=0.14,<1.0",
+    # Replaces the predecessor's pickled-.npy persistence, which is not portable
+    # across numpy versions and cannot be read without executing pickle.
+    "h5py>=3.11,<4.0",
+    # CalVer, released roughly monthly. Bound is a year out rather than the next
+    # release, so routine upgrades are not blocked; revisit each January.
+    "tifffile>=2024.7,<2027.0",
+    "pyyaml>=6.0,<7.0",
+    # Lets the CLI resolve DATA_ROOT from .env without a shell export.
+    "python-dotenv>=1.0,<2.0",
+    # Used by provenance.provenance_utils for environment snapshots (soft import).
+    "psutil>=5.9,<8.0",
+    "tqdm>=4.66,<5.0",
+    # Parquet backend for the artifact store. DataFrames are the central data
+    # structure here and CSV round-trips silently lose dtypes (the predecessor
+    # repo's persistence bug class); parquet round-trips them exactly.
+    "pyarrow>=17.0,<24.0",
+]
+
+[project.optional-dependencies]
+# Quarantined deliberately. suite2p 1.1 pulls torch + cellpose + segment_anything,
+# and its scanimage-tiff-reader dependency last shipped a Linux wheel for cp37
+# (July 2023), so on any modern Python it builds from sdist. Keeping it out of the
+# core means `uv sync` and CI stay fast and cannot be broken by that chain.
+# Install only when doing motion correction / ROI extraction:
+#     uv sync --extra suite2p
+suite2p = [
+    "suite2p>=1.1,<2.0",
+]
+dev = [
+    "pytest>=8.0,<9.0",
+    "pytest-cov>=5.0,<8.0",
+    "ruff>=0.6,<1.0",
+    "mypy>=1.11,<2.0",
+    "pre-commit>=3.8,<5.0",
+    "ipykernel>=6.29,<7.0",
+    "types-psutil>=5.9,<8.0",
+    "types-pyyaml>=6.0,<7.0",
+    "types-tqdm>=4.66,<5.0",
+    "pandas-stubs>=2.2,<3.0",
+]
+notebooks = [
+    "jupyterlab>=4.2,<5.0",
+    "ipywidgets>=8.1,<9.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# The distribution name (calcium2p) matches the import name, but hatchling still
+# needs the src-layout path spelled out.
+[tool.hatch.build.targets.wheel]
+packages = ["src/calcium2p"]
+
+# ---------------------------------------------------------------------------
+# Ruff -- linting AND formatting. The reference repo configured only line-length;
+# an explicit rule selection is what turns this into a real gate.
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests", "scripts"]
+extend-exclude = [".venv", "docs", "notebooks/.ipynb_checkpoints"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",    # pycodestyle -- PEP 8 proper
+    "F",         # pyflakes
+    "I",         # import sorting
+    "N",         # PEP 8 naming
+    "UP",        # pyupgrade -- keep idioms current with the target version
+    "B",         # bugbear
+    "A",         # builtin shadowing
+    "C4",        # comprehensions
+    "SIM",       # simplification
+    "PTH",       # prefer pathlib over os.path (the predecessor's Windows-path pain)
+    "RUF",
+    "D",         # docstrings
+    "ANN",       # annotations -- the input mypy needs
+    "ARG",       # unused arguments
+    "PL",        # pylint subset
+    "TID",       # tidy imports
+    "TRY",       # exception antipatterns
+]
+ignore = [
+    "D203",     # conflicts with D211
+    "D213",     # conflicts with D212
+    "ANN401",   # Any is sometimes correct at boundaries
+    "PLR0913",  # provenance record builders legitimately take many kwargs
+    "TRY003",   # long inline exception messages are fine and more useful
+    # UP017 rewrites datetime.timezone.utc -> datetime.UTC, but that alias is
+    # Python 3.11+. provenance_utils is kept importable under older interpreters
+    # so tooling can load it outside this project's venv. timezone.utc is not
+    # deprecated -- only older. Keep it.
+    "UP017",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests: assertions and magic numbers are the point.
+"tests/**" = ["D", "ANN", "PLR2004", "ARG"]
+# Notebooks are exploratory by definition.
+"notebooks/**" = ["D", "ANN", "E402", "PLR2004"]
+# Scratch scripts are investigatory; they must still run, but need not be documented.
+"scripts/scratch/**" = ["D", "ANN", "PLR2004", "T201"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "parents"
+
+# ---------------------------------------------------------------------------
+# Mypy -- absent from the reference repo despite its pervasive type hints.
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.12"
+files = ["src", "tests", "scripts"]
+strict = true
+warn_unreachable = true
+warn_no_return = true
+show_error_codes = true
+pretty = true
+exclude = ['^docs/', '^notebooks/']
+
+[[tool.mypy.overrides]]
+# Scientific packages that ship no stubs. Listed explicitly rather than via a
+# blanket ignore_missing_imports, so a new untyped dep is a conscious decision.
+module = [
+    "suite2p.*",
+    "seaborn.*",
+    "statsmodels.*",
+    "skimage.*",
+    "tifffile.*",
+    "h5py.*",
+    "scipy.*",
+    "sklearn.*",
+    "matplotlib.*",
+    "mpl_toolkits.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# Scratch scripts are investigatory and short-lived.
+module = ["scripts.scratch.*"]
+disallow_untyped_defs = false
+
+# ---------------------------------------------------------------------------
+# Pytest
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short --strict-markers"
+markers = [
+    "integration: exercises several modules together; slower than a unit test",
+    "slow: takes more than ~5 seconds",
+    "suite2p: requires the optional [suite2p] extra to be installed",
+]
+
+[tool.coverage.run]
+source = ["src/calcium2p"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:", "raise NotImplementedError"]

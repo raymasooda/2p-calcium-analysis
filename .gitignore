@@ -1,0 +1,80 @@
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# ---------------------------------------------------------------------------
+# Environments -- uv manages .venv; uv.lock IS committed (see docs/DECISIONS.md)
+# ---------------------------------------------------------------------------
+.venv/
+venv/
+env/
+.uv/
+
+# ---------------------------------------------------------------------------
+# Tooling caches
+# ---------------------------------------------------------------------------
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+.ipynb_checkpoints/
+
+# ---------------------------------------------------------------------------
+# IDE / OS
+# ---------------------------------------------------------------------------
+.idea/
+.vscode/
+.DS_Store
+
+# ---------------------------------------------------------------------------
+# Data -- never commit data. Everything is read from $DATA_ROOT.
+# ---------------------------------------------------------------------------
+data/
+outputs/
+output/
+tmp/
+logs/
+*.tif
+*.tiff
+*.bin
+*.npy
+*.h5
+*.hdf5
+*.mat
+
+# ---------------------------------------------------------------------------
+# Machine-specific config. The *.example.yaml templates ARE tracked; a user's
+# own configs/<session>.yaml is not.
+# ---------------------------------------------------------------------------
+configs/*.yaml
+configs/*.yml
+!configs/*.example.yaml
+!configs/*.example.yml
+.env
+
+# ---------------------------------------------------------------------------
+# docs/ is DELIBERATELY not committed (per repo policy).
+#
+# It holds dev-facing material: implementation justification, progress reports,
+# roadmaps, and working notes.
+#
+# TRADEOFF, stated so it is not rediscovered later: this content does NOT survive
+# a fresh clone and never reaches a collaborator. It is local-machine state. If a
+# document needs to outlive this working copy, promote it to README.md or a
+# docstring, which are tracked.
+# ---------------------------------------------------------------------------
+docs/
+
+# ---------------------------------------------------------------------------
+# Scratch / investigatory scripts: local working files, never part of the repo.
+# ---------------------------------------------------------------------------
+scripts/scratch/

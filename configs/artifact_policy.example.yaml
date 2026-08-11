@@ -1,0 +1,33 @@
+# Thresholds for the materialize-vs-mutation-record decision.
+#
+# Copy to configs/artifact_policy.yaml (gitignored) and tune for your machine --
+# a laptop with 500 GB free wants different numbers from a workstation with 8 TB.
+#
+#     policy = MaterializationPolicy.from_mapping(
+#         yaml.safe_load(Path("configs/artifact_policy.yaml").read_text()))
+#     store = ArtifactStore(root, policy=policy)
+
+# At or above this wall-clock cost, an artifact is ALWAYS written to disk:
+# recomputing it costs more than the space it occupies.
+compute_seconds_threshold: 60.0
+
+# At or above this size, an artifact becomes a candidate for a mutation record
+# instead of being stored -- but only if it is also cheap to recompute.
+size_gib_threshold: 2.0
+
+# Kinds always written to disk regardless of the numbers. These are small, and
+# they are what a human actually opens.
+always_materialize_kinds:
+  - figure
+  - metric
+  - report
+
+# Kinds never written to disk, whatever their size. Empty by default; use this
+# for a derived form you can always rebuild and never want to keep.
+never_materialize_kinds: []
+
+# Note the asymmetry in MaterializationPolicy.decide: compute time is checked
+# BEFORE size, so something both slow and huge is stored. The policy optimizes
+# for never repeating expensive work and treats disk as the cheaper resource.
+# Unmeasured compute counts as expensive, so the failure mode is a wasted
+# gigabyte rather than a lost afternoon.

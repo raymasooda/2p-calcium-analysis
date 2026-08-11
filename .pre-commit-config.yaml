@@ -1,0 +1,54 @@
+# Install once with:  uv run pre-commit install --hook-type pre-commit --hook-type commit-msg
+#
+# The same gates as .github/workflows/ci.yml, run earlier. Absent from the
+# reference repo, which is why lint drift there was only ever caught by hand.
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files
+        # Data belongs under DATA_ROOT, never in git.
+        args: [--maxkb=512]
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: no-commit-to-branch
+        # Work happens on feature branches; main only advances by merge.
+        args: [--branch, main]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.2
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.18.2
+    hooks:
+      - id: mypy
+        files: ^src/
+        additional_dependencies:
+          - types-psutil
+          - types-pyyaml
+          - types-tqdm
+          - pandas-stubs
+          - numpy
+
+  - repo: local
+    hooks:
+      # Conventional Commits, checked with the same regex as the CI job, so a
+      # message that passes here cannot fail there.
+      - id: conventional-commit
+        name: commit message follows Conventional Commits
+        language: system
+        stages: [commit-msg]
+        entry: >-
+          bash -c 'head -1 "$1" | grep -qE
+          "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9._/-]+\))?!?: .+"
+          || { echo "Not Conventional Commits. Expected: <type>(<scope>): <subject>"; exit 1; }' --
+

@@ -1,0 +1,48 @@
+# Example session config.
+#
+# Copy to configs/<session>.yaml (gitignored) and edit. Only *.example.yaml is
+# tracked, via the .gitignore negation:
+#     configs/*.yaml
+#     !configs/*.example.yaml
+#
+# Load it with:
+#     uv run python scripts/run_pipeline.py --config configs/ses-20260409.yaml
+
+# BIDS-like identifiers. Together they locate the session under $DATA_ROOT:
+#   $DATA_ROOT/<study>/<subject>/<session>/
+subject: sub-bono
+study: study-go_nogo
+session: ses-20260409
+
+# Explicit run ids, or the sentinel "auto" to discover them on disk.
+runs: auto
+# runs:
+#   - run-01
+#   - run-02
+
+# Imaging frame rate in Hz.
+fps: 30.0
+
+# Channels recorded. The predecessor setup imaged thalamic boutons (GCaMP6f,
+# green) and cortical dendrites (jRGECO1a, red) simultaneously in layer 1 of
+# posterior parietal cortex.
+channels:
+  - green
+  - red
+
+# F0 window in seconds, used as the dF/F0 baseline. Must be increasing.
+baseline_window_s: [0.0, 3.0]
+
+# Behavioural trial structure, in seconds. Defaults match the Go/NoGo paradigm
+# the predecessor repo used: 12 s trials, stimulus at t=3 s, 1 s to respond.
+trial_duration_s: 12.0
+stimulus_onset_s: 3.0
+response_window_s: 1.0
+
+notes: >
+  Reversal-learning session. Sessions before 2026-04 use the legacy underscore
+  camera naming; this one uses hyphens.
+
+# Anything not part of the schema. Kept out of the typed fields deliberately so
+# adding an ad-hoc key never breaks SessionConfig construction.
+extra: {}
