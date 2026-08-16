@@ -192,9 +192,21 @@ class EventTableParams:
       exclusive), 5--7 s for the 2 s reward family and 3--3.5 s for the 500 ms
       stimulus family.
 
-    The Batch3 passive threshold basis could not be pinned to a single rule
-    (its fitted per-session thresholds match no baseline of the stored
-    traces); its regeneration is therefore partial and reported as such.
+    Passive-group regeneration is capped at roughly a quarter of rows, and the
+    cause is now known rather than merely unfitted. The upstream detection
+    routine existed in two variants; the one that produced the passive tables
+    sliced the wrong axis --
+
+    ``std = np.asarray(df.iloc[:, round(1*fps):round(2*fps)]).std()``
+
+    -- where ``df`` is already transposed, so it takes the deviation over a
+    *slice of trials across all frames* rather than over the 1--2 s baseline.
+    Because the slice indexes trials, the threshold depends on which trials sat
+    in the matrix at processing time: the full multi-protocol stack, of which
+    the exported passive traces are only a subset. The threshold is therefore
+    unrecoverable in principle from the exported data (it fits to within ~1%,
+    an order of magnitude closer than any other candidate rule). Closing it
+    bit-exactly needs the passive cohort's own ``_processed_calcium.npy``.
     """
 
     threshold_sd: float = 2.0
