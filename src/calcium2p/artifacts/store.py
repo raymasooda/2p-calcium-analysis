@@ -182,6 +182,38 @@ class ParquetSerializer(Serializer):
         return int(obj.memory_usage(deep=True).sum())
 
 
+class SvgSerializer(Serializer):
+    """SVG markup (a string) as ``.svg``.
+
+    Figure stages render matplotlib figures to SVG text (see
+    :func:`calcium2p.viz.render.figure_to_svg`) and return the markup, so
+    figures flow through the store like any artifact -- always materialized by
+    policy, with a provenance sidecar. Must precede :class:`JsonSerializer` in
+    the registry: any string also survives a JSON round-trip.
+    """
+
+    name = "svg"
+    extension = ".svg"
+
+    def save(self, obj: Any, path: Path) -> None:
+        """Write the markup."""
+        path.write_text(obj, encoding="utf-8")
+
+    def load(self, path: Path) -> Any:
+        """Read the markup back."""
+        return path.read_text(encoding="utf-8")
+
+    @classmethod
+    def handles(cls, obj: Any) -> bool:
+        """Return True for strings that begin like an SVG document."""
+        return isinstance(obj, str) and obj.lstrip()[:5].lower() in ("<?xml", "<svg ")
+
+    @classmethod
+    def estimate_size(cls, obj: Any) -> int | None:
+        """Exact: the encoded text length."""
+        return len(obj.encode("utf-8")) if isinstance(obj, str) else None
+
+
 class JsonSerializer(Serializer):
     """Any JSON-serializable object."""
 
@@ -212,6 +244,7 @@ SERIALIZERS: tuple[type[Serializer], ...] = (
     NumpySerializer,
     NpzSerializer,
     ParquetSerializer,
+    SvgSerializer,
     JsonSerializer,
 )
 

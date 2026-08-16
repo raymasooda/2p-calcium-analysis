@@ -24,7 +24,7 @@ from calcium2p.provenance import compute_checksum
 from calcium2p.provenance.records import ArtifactKind
 
 #: How a stored artifact was serialized. Drives loader selection on read.
-SerializerName = Literal["npy", "npz", "parquet", "json", "csv", "text"]
+SerializerName = Literal["npy", "npz", "parquet", "json", "svg", "csv", "text"]
 
 #: Which representation was chosen for a given artifact.
 Representation = Literal["materialized", "mutation_record"]
