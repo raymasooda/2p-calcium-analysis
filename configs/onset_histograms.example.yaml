@@ -38,15 +38,19 @@ fps_by_cohort:
   default: 30.3
 
 # For event_source: regenerated. The upstream code that produced the original
-# CSVs was never committed, so these are declarative and fitted against the
-# reference tables (see scripts/validate_reproduction.py).
+# CSVs was never committed; these defaults were RECOVERED by fitting against
+# the reference tables (validated 100% exact for task_axons; see
+# calcium2p.cohort.event_tables for the per-group recipes and
+# scripts/validate_reproduction.py for the match-rate report). Onsets are kept
+# strictly inside the family window (both bounds exclusive).
 event_tables:
   threshold_sd: 2.0
   min_samples: 6
-  baseline_window_s: [1.0, 2.0]
+  baseline_window_s: [2.0, 3.0]     # pre-stimulus; task-cohort default
   reward_window_s: [5.0, 7.0]
   stim_window_s: [3.0, 3.5]
-  boundary: open_open         # ev_onset strictly inside the window
+  baseline_window_overrides:
+    passive_batch1: [0.0, 2.0]
 
 epochs:
   - name: histogram

@@ -175,18 +175,34 @@ class ModulationSpec:
 class EventTableParams:
     """Parameters for regenerating event tables from the deltaF traces.
 
-    The code that produced the original event CSVs was never committed, so
-    every parameter that could plausibly have varied is declarative here and
-    fitted against the reference tables by
-    ``calcium2p.cohort.validation.compare_event_tables``.
+    The code that produced the original event CSVs was never committed. These
+    defaults were *recovered* by fitting against the reference tables (see
+    ``calcium2p.cohort.event_tables`` for the per-group recipes and
+    ``calcium2p.cohort.validation.compare_event_tables`` for the fit):
+
+    - the detection threshold is ``threshold_sd`` x the standard deviation of
+      the flattened baseline window over the ROI's *validated-outcome trial
+      stack* (cHIT/nHIT/CATCH*/FA branches for the task cohorts; every
+      NAIVE-STIM-REW trial for the passive cohorts), with upper == lower
+      (degenerate hysteresis) and ``min_samples`` samples above threshold;
+    - the baseline window is 2--3 s for the task cohorts (pre-stimulus) and
+      0--2 s for Batch1 passive, both at ``round(t * fps)`` positions with no
+      offset; per-group overrides live in ``baseline_window_overrides``;
+    - event onsets are kept strictly inside the family window (both bounds
+      exclusive), 5--7 s for the 2 s reward family and 3--3.5 s for the 500 ms
+      stimulus family.
+
+    The Batch3 passive threshold basis could not be pinned to a single rule
+    (its fitted per-session thresholds match no baseline of the stored
+    traces); its regeneration is therefore partial and reported as such.
     """
 
     threshold_sd: float = 2.0
     min_samples: int = 6
-    baseline_window_s: tuple[float, float] = (1.0, 2.0)
+    baseline_window_s: tuple[float, float] = (2.0, 3.0)
     reward_window_s: tuple[float, float] = (5.0, 7.0)
     stim_window_s: tuple[float, float] = (3.0, 3.5)
-    boundary: Literal["open_open", "open_closed", "closed_open", "closed_closed"] = "open_open"
+    baseline_window_overrides: dict[str, tuple[float, float]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -314,10 +330,17 @@ def _pair(value: Any, context: str) -> tuple[float, float]:
 
 
 def _coerce_windows(data: dict[str, Any]) -> dict[str, Any]:
-    """Coerce every ``*window*`` field of a mapping into a float pair."""
+    """Coerce every ``*window*`` field of a mapping into float pairs.
+
+    Dict-valued fields (per-group override maps) are coerced element-wise.
+    """
     out = dict(data)
     for key, value in out.items():
-        if "window" in key:
+        if "window" not in key:
+            continue
+        if isinstance(value, dict):
+            out[key] = {group: _pair(window, f"{key}[{group}]") for group, window in value.items()}
+        else:
             out[key] = _pair(value, key)
     return out
 
