@@ -38,6 +38,7 @@ from calcium2p.core.paths import data_root
 from calcium2p.io.legacy import read_reference_events, read_reference_frequencies
 from calcium2p.provenance.provenance_utils import compute_checksum
 from calcium2p.viz.comparisons import comparison_bar, comparison_colors
+from calcium2p.viz.onset_histograms import onset_histogram_grid
 from calcium2p.viz.render import figure_to_svg
 
 if TYPE_CHECKING:
@@ -324,6 +325,28 @@ def run_onset_analysis(  # noqa: PLR0915 - the linear orchestration reads best u
         stats_key, _return_frame, params={"payload": stats_frame.to_json()}, kind="metric"
     )
     keys_written.append(stats_key)
+
+    # the notebooks weighted each side by its own active-ROI count; the grid
+    # here uses the target side's counts for both -- a documented deviation
+    # (the byte-faithful grid is produced by the reproduction harness)
+    grid = onset_histogram_grid(
+        sides["target"],
+        sides["reference"],
+        target_trials=counts.target_totals,
+        reference_trials=counts.reference_totals,
+        roi_counts={p: int(f.index.nunique()) for p, f in sides["target"].items()},
+        spec=config.histogram,
+        align_at=5.0 if config.alignment == "reward" else 3.0,
+    )
+    grid_key = f"{config.run_id}/figures/onset_histogram_grid/{mode}"
+    store.get_or_compute(
+        grid_key,
+        _return_text,
+        params={"payload": figure_to_svg(grid)},
+        kind="figure",
+        serializer="svg",
+    )
+    keys_written.append(grid_key)
 
     return {
         "trial_counts": counts,
