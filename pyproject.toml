@@ -186,6 +186,7 @@ markers = [
     "integration: exercises several modules together; slower than a unit test",
     "slow: takes more than ~5 seconds",
     "suite2p: requires the optional [suite2p] extra to be installed",
+    "requires_data: needs the machine-local legacy dataset under DATA_ROOT (auto-skipped elsewhere)",
 ]
 
 [tool.coverage.run]
