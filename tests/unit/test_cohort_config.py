@@ -13,7 +13,9 @@ from calcium2p.core.cohort_config import (
     CohortConfigError,
     ComparisonSpec,
     EpochSpec,
+    expand_figure_manifest,
     load_cohort_config,
+    load_figure_manifest,
 )
 
 
@@ -145,3 +147,83 @@ class TestLoadCohortConfig:
         assert config.alignment == "reward"
         assert config.legacy_faithful is True
         assert config.epoch("early reward").window_for("NO_DREADDs") == (5.05, 5.8)
+
+
+def manifest_mapping() -> dict:
+    """Two states sharing defaults; the second overrides one default key."""
+    return {
+        "defaults": {"legacy_faithful": True, "data_subdir": "manuscript/V10"},
+        "states": [
+            {**minimal_mapping(), "run_id": "state-a"},
+            {**minimal_mapping(), "run_id": "state-b", "legacy_faithful": False},
+        ],
+    }
+
+
+class TestFigureManifest:
+    def test_expands_one_config_per_state_with_defaults(self) -> None:
+        configs = expand_figure_manifest(manifest_mapping())
+        assert [c.run_id for c in configs] == ["state-a", "state-b"]
+        assert all(c.data_subdir == "manuscript/V10" for c in configs)
+
+    def test_state_keys_override_defaults(self) -> None:
+        a, b = expand_figure_manifest(manifest_mapping())
+        assert a.legacy_faithful is True
+        assert b.legacy_faithful is False
+
+    def test_duplicate_run_ids_raise(self) -> None:
+        data = manifest_mapping()
+        data["states"][1]["run_id"] = "state-a"
+        with pytest.raises(CohortConfigError, match="duplicate run_id"):
+            expand_figure_manifest(data)
+
+    @pytest.mark.parametrize("states", [None, [], "not-a-list"])
+    def test_missing_or_empty_states_raise(self, states: object) -> None:
+        with pytest.raises(CohortConfigError, match="states"):
+            expand_figure_manifest({"defaults": {}, "states": states})
+
+    def test_invalid_state_names_the_state(self) -> None:
+        data = manifest_mapping()
+        data["states"][1]["comparisons"][0]["epoch"] = "no such epoch"
+        with pytest.raises(CohortConfigError, match=r"states\[1\].*state-b"):
+            expand_figure_manifest(data)
+
+
+class TestBundledV10Manifest:
+    """The shipped V10 recipe: shape checks that hold without the dataset."""
+
+    @pytest.fixture(scope="class")
+    def configs(self) -> tuple[CohortConfig, ...]:
+        from calcium2p.cohort.manifest import bundled_manifest  # noqa: PLC0415
+
+        return load_figure_manifest(bundled_manifest("v10"))
+
+    def test_counts(self, configs: tuple[CohortConfig, ...]) -> None:
+        assert len(configs) == 7
+        assert sum(len(c.comparisons) for c in configs) == 57
+
+    def test_every_figure_carries_its_original_ylim(
+        self, configs: tuple[CohortConfig, ...]
+    ) -> None:
+        assert all(s.figure.ylim is not None for c in configs for s in c.comparisons)
+
+    def test_legacy_numbers_from_reference_events(self, configs: tuple[CohortConfig, ...]) -> None:
+        assert all(c.legacy_faithful and c.event_source == "reference" for c in configs)
+
+    def test_latency_from_reward_normalization_is_recorded(
+        self, configs: tuple[CohortConfig, ...]
+    ) -> None:
+        offsets = {
+            (s.name, s.metric): s.normalize.offset
+            for c in configs
+            for s in c.comparisons
+            if s.normalize is not None
+        }
+        assert offsets[("Passive axons cRew vs. cHIT", "ev_onset")] == 5.0
+        assert offsets[("Passive dendrites cRew vs. cHIT", "ev_onset")] == 0.0
+
+    def test_unknown_bundled_name_raises(self) -> None:
+        from calcium2p.cohort.manifest import bundled_manifest  # noqa: PLC0415
+
+        with pytest.raises(KeyError, match="no bundled manifest"):
+            bundled_manifest("v99")
