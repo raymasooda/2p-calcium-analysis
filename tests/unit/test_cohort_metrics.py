@@ -106,3 +106,23 @@ class TestNormalizeByReference:
         )
         assert normalized[("p", "cRew")].tolist() == [1.0, 2.0]  # divided by mean(nRew)=2
         assert normalized[("q", "cHIT")].tolist() == [2.0, 3.0]  # divided by mean(nHIT)=3
+
+    def test_offset_measures_from_the_offset(self) -> None:
+        # the published normalized onset figure: (x - 5) / (mean(ref) - 5)
+        columns = pd.MultiIndex.from_tuples(
+            [("p", "cRew"), ("p", "nRew"), ("q", "cHIT"), ("q", "nHIT")]
+        )
+        frame = pd.DataFrame(
+            [[5.2, 5.4, 5.3, 5.5], [5.6, 5.6, 5.9, 5.5]], columns=columns, index=["r1", "r2"]
+        )
+        normalized = normalize_by_reference(
+            frame,
+            ("p", "cRew"),
+            ("q", "cHIT"),
+            NormalizeSpec(a_reference=("p", "nRew"), b_reference=("q", "nHIT"), offset=5.0),
+        )
+        assert normalized[("p", "cRew")].tolist() == pytest.approx([0.4, 1.2])  # / mean 0.5
+        assert normalized[("q", "cHIT")].tolist() == pytest.approx([0.6, 1.8])  # / mean 0.5
+
+    def test_zero_offset_is_the_plain_ratio(self) -> None:
+        assert NormalizeSpec(a_reference=("p", "nRew"), b_reference=("q", "nHIT")).offset == 0.0

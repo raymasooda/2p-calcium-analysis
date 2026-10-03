@@ -97,11 +97,19 @@ class NormalizeSpec:
     Reproduces the notebooks' "non-consecutive-normalized" figures: side ``a``
     is divided by the mean of ``a_reference`` and side ``b`` by the mean of
     ``b_reference`` (e.g. cRew / mean(nRew) vs cHIT / mean(nHIT)).
+
+    ``offset`` is subtracted from every value (and so from each reference
+    mean) before dividing: ``(x - offset) / (mean(reference) - offset)``. The
+    published normalized onset-latency figure used ``offset = 5.0`` -- latency
+    measured from reward delivery (t = 5 s) rather than from trial start --
+    which no saved notebook state contains; it was recovered from the
+    figure's own point values.
     """
 
     a_reference: tuple[str, str]
     b_reference: tuple[str, str]
     stat: Literal["mean"] = "mean"
+    offset: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -390,6 +398,63 @@ def _comparison_from_mapping(data: dict[str, Any]) -> ComparisonSpec:
             fig["ylim"] = _pair(fig["ylim"], f"{payload.get('name')}: ylim")
         payload["figure"] = ComparisonFigure(**fig)
     return ComparisonSpec(**payload)
+
+
+def expand_figure_manifest(data: dict[str, Any]) -> tuple[CohortConfig, ...]:
+    """Expand a figure manifest mapping into one :class:`CohortConfig` per state.
+
+    A manifest records the published figures of a manuscript, grouped by the
+    notebook *state* each was saved from (every state is one run: one
+    modulation window, one set of switches). ``defaults`` holds the keys every
+    state shares (data location, datasets, sampling rates); each entry of
+    ``states`` supplies the rest and overrides any default key it repeats.
+
+    Raises
+    ------
+    CohortConfigError
+        If the mapping is malformed, a state is invalid, or run ids collide.
+    """
+    defaults = data.get("defaults", {})
+    states = data.get("states")
+    if not isinstance(defaults, dict) or not isinstance(states, list) or not states:
+        raise CohortConfigError(
+            "figure manifest needs a 'defaults' mapping and a non-empty 'states' list"
+        )
+    configs = []
+    for i, state in enumerate(states):
+        if not isinstance(state, dict):
+            raise CohortConfigError(f"states[{i}] must be a mapping")
+        try:
+            configs.append(CohortConfig.from_mapping({**defaults, **state}))
+        except CohortConfigError as exc:
+            raise CohortConfigError(f"states[{i}] ({state.get('run_id')!r}): {exc}") from exc
+    run_ids = [c.run_id for c in configs]
+    duplicates = sorted({r for r in run_ids if run_ids.count(r) > 1})
+    if duplicates:
+        raise CohortConfigError(f"duplicate run_id(s) in figure manifest: {duplicates}")
+    return tuple(configs)
+
+
+def load_figure_manifest(path: str | Path) -> tuple[CohortConfig, ...]:
+    """Read a figure-manifest YAML; see :func:`expand_figure_manifest`.
+
+    Raises
+    ------
+    CohortConfigError
+        If the file is not a mapping, or does not match the schema.
+    """
+    import yaml  # noqa: PLC0415
+
+    path = Path(path)
+    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        raise CohortConfigError(
+            f"{path}: top-level YAML must be a mapping, got {type(raw).__name__}"
+        )
+    try:
+        return expand_figure_manifest(raw)
+    except CohortConfigError as exc:
+        raise CohortConfigError(f"{path}: {exc}") from exc
 
 
 def load_cohort_config(path: str | Path) -> CohortConfig:
