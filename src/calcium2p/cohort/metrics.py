@@ -197,12 +197,14 @@ def normalize_by_reference(
 
     Port of the notebooks' "non-consecutive-normalized" construction (reward
     cell 30): side ``a`` divided by ``mean(a_reference)``, side ``b`` by
-    ``mean(b_reference)``. Column labels are preserved so the same
-    :class:`~calcium2p.core.cohort_config.ComparisonSpec` addresses the
-    normalized frame.
+    ``mean(b_reference)``, after subtracting ``normalize.offset`` from every
+    value (0 by default, i.e. the plain ratio). Column labels are preserved so
+    the same :class:`~calcium2p.core.cohort_config.ComparisonSpec` addresses
+    the normalized frame.
     """
-    norm_a = frame[spec_a] / frame[normalize.a_reference].mean()
-    norm_b = frame[spec_b] / frame[normalize.b_reference].mean()
+    off = normalize.offset
+    norm_a = (frame[spec_a] - off) / (frame[normalize.a_reference] - off).mean()
+    norm_b = (frame[spec_b] - off) / (frame[normalize.b_reference] - off).mean()
     out = pd.concat({spec_a: norm_a, spec_b: norm_b}, axis=1)
     out.columns = pd.MultiIndex.from_tuples([spec_a, spec_b], names=["protocol", "outcome"])
     return out

@@ -1,0 +1,919 @@
+{
+ "_about": "Per-figure statistics of the V10 manuscript comparison figures, recorded inside the verbatim-notebook reproduction from the exact objects each figure was drawn from (n = ROIs, mean/SEM as plotted, p as tested). Paired figures pin n_pairs and p only: their bars show all ROIs while the test uses the paired subset.",
+ "figures": {
+  "Axons cHIT vs. nHIT early reward ev_duration.svg": {
+   "state": "v10-reward-ev-duration-paired-t-modulated",
+   "test": "paired t (scipy ttest_rel)",
+   "p": 0.1867228652075851,
+   "n_pairs": 65
+  },
+  "Axons cHIT vs. nHIT early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.011603588574845305,
+   "n": [
+    67,
+    95
+   ],
+   "mean": [
+    5.502986052057982,
+    5.578279085620623
+   ],
+   "sem": [
+    0.025014920012725535,
+    0.017701029307599918
+   ]
+  },
+  "Axons cHIT vs. nHIT early reward peak.svg": {
+   "state": "v10-reward-ev-onset-peak-student-t-modulated",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 0.0888901506867474,
+   "n": [
+    67,
+    95
+   ],
+   "mean": [
+    0.9409414852072405,
+    1.1160085164132116
+   ],
+   "sem": [
+    0.07613637766318239,
+    0.06703298520846161
+   ]
+  },
+  "Axons cHIT vs. nHIT early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.0024695103349518443,
+   "n": [
+    67,
+    95
+   ],
+   "mean": [
+    0.5271144278606965,
+    0.4016666666666667
+   ],
+   "sem": [
+    0.029517017327077094,
+    0.02120841521866297
+   ]
+  },
+  "Axons cHIT vs. nHIT stim ev_onset.svg": {
+   "state": "v10-stimulus-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.23043554256421273,
+   "n": [
+    32,
+    68
+   ],
+   "mean": [
+    3.2772934402968787,
+    3.3020786900221784
+   ],
+   "sem": [
+    0.013311357080258556,
+    0.01232785703028613
+   ]
+  },
+  "Axons cHIT vs. nHIT stim rate.svg": {
+   "state": "v10-stimulus-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 5.407921306501773e-06,
+   "n": [
+    32,
+    68
+   ],
+   "mean": [
+    0.54375,
+    0.29554738562091504
+   ],
+   "sem": [
+    0.05105160919182929,
+    0.028052014454214385
+   ]
+  },
+  "Control dendrites post-CNO cHIT vs. nHIT early reward ev_duration.svg": {
+   "state": "v10-reward-ev-duration-paired-t-modulated",
+   "test": "paired t (scipy ttest_rel)",
+   "p": 0.3698397159953365,
+   "n_pairs": 29
+  },
+  "Control dendrites post-CNO cHIT vs. nHIT early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.019491406208256644,
+   "n": [
+    37,
+    83
+   ],
+   "mean": [
+    5.513141854726013,
+    5.636410012200302
+   ],
+   "sem": [
+    0.03761207120135564,
+    0.02297287567289931
+   ]
+  },
+  "Control dendrites post-CNO cHIT vs. nHIT early reward peak.svg": {
+   "state": "v10-reward-ev-onset-peak-student-t-modulated",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 0.8597929860444746,
+   "n": [
+    37,
+    83
+   ],
+   "mean": [
+    4.290479058181663,
+    4.238076181739128
+   ],
+   "sem": [
+    0.2742415572121849,
+    0.1554403503960267
+   ]
+  },
+  "Control dendrites post-CNO cHIT vs. nHIT early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 4.685672516804543e-05,
+   "n": [
+    37,
+    83
+   ],
+   "mean": [
+    0.14291770762358996,
+    0.08136011615306948
+   ],
+   "sem": [
+    0.01387553323855587,
+    0.0054773660754536815
+   ]
+  },
+  "Control dendrites pre-CNO cHIT vs. nHIT early reward ev_duration.svg": {
+   "state": "v10-reward-ev-duration-paired-t-modulated",
+   "test": "paired t (scipy ttest_rel)",
+   "p": 0.14983249258821305,
+   "n_pairs": 16
+  },
+  "Control dendrites pre-CNO cHIT vs. nHIT early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.00331544871271495,
+   "n": [
+    21,
+    36
+   ],
+   "mean": [
+    5.4471947194719466,
+    5.617590264317436
+   ],
+   "sem": [
+    0.03987948466130014,
+    0.02566689314685008
+   ]
+  },
+  "Control dendrites pre-CNO cHIT vs. nHIT early reward peak.svg": {
+   "state": "v10-reward-ev-onset-peak-student-t-modulated",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 0.4125853290814282,
+   "n": [
+    21,
+    36
+   ],
+   "mean": [
+    4.372845020320273,
+    3.9952591460459908
+   ],
+   "sem": [
+    0.34602254317622233,
+    0.2849198299680549
+   ]
+  },
+  "Control dendrites pre-CNO cHIT vs. nHIT early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.000654004045850301,
+   "n": [
+    21,
+    36
+   ],
+   "mean": [
+    0.16775455121319782,
+    0.09022921522921523
+   ],
+   "sem": [
+    0.020194550652102464,
+    0.006773556677641315
+   ]
+  },
+  "Control dendrites pre-CNO vs. post-CNO Hit early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-peak-student-t-modulated",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 0.14346110455158875,
+   "n": [
+    41,
+    91
+   ],
+   "mean": [
+    5.570880752419028,
+    5.624142678326119
+   ],
+   "sem": [
+    0.028071833156387668,
+    0.02072835145746322
+   ]
+  },
+  "Control dendrites pre-CNO vs. post-CNO Hit early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.12285156389824943,
+   "n": [
+    41,
+    91
+   ],
+   "mean": [
+    0.07447166206855839,
+    0.06596547541373073
+   ],
+   "sem": [
+    0.006737777291349651,
+    0.004864066001712418
+   ]
+  },
+  "NO_DREADDs cHIT vs. nHIT early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-student-t-active-pd62",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 0.010977656236674125,
+   "n": [
+    9,
+    42
+   ],
+   "mean": [
+    5.255262264929833,
+    5.428860736199918
+   ],
+   "sem": [
+    0.04972790711613515,
+    0.02838754698005071
+   ]
+  },
+  "NO_DREADDs cHIT vs. nHIT early reward rate.svg": {
+   "state": "v10-reward-rate-mannwhitney-active-pd62",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.0025764169759250246,
+   "n": [
+    9,
+    42
+   ],
+   "mean": [
+    0.22592592592592592,
+    0.16108362536933965
+   ],
+   "sem": [
+    0.01245705930284603,
+    0.011893693317044233
+   ]
+  },
+  "Passive axons cRew vs. cHIT early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-peak-student-t-modulated",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 0.20656890864583646,
+   "n": [
+    104,
+    67
+   ],
+   "mean": [
+    5.55212574545522,
+    5.502986052057982
+   ],
+   "sem": [
+    0.026595239889912227,
+    0.025014920012725535
+   ]
+  },
+  "Passive axons cRew vs. cHIT early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.0005077974586779824,
+   "n": [
+    104,
+    67
+   ],
+   "mean": [
+    0.4043002136752137,
+    0.5271144278606965
+   ],
+   "sem": [
+    0.019239205949176105,
+    0.029517017327077094
+   ]
+  },
+  "Passive axons cRew vs. nRew early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.7199184143342632,
+   "n": [
+    104,
+    130
+   ],
+   "mean": [
+    5.55212574545522,
+    5.524118572833007
+   ],
+   "sem": [
+    0.026595239889912227,
+    0.018346838237571484
+   ]
+  },
+  "Passive axons cRew vs. nRew early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.11397631679553387,
+   "n": [
+    104,
+    130
+   ],
+   "mean": [
+    0.4043002136752137,
+    0.3602907092907093
+   ],
+   "sem": [
+    0.019239205949176105,
+    0.017260479905266597
+   ]
+  },
+  "Passive dendrites cRew vs. cHIT early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-student-t-active-pd62",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 4.363571057450155e-05,
+   "n": [
+    28,
+    9
+   ],
+   "mean": [
+    5.659532790013695,
+    5.255262264929833
+   ],
+   "sem": [
+    0.04615339471725565,
+    0.04972790711613515
+   ]
+  },
+  "Passive dendrites cRew vs. cHIT early reward rate.svg": {
+   "state": "v10-reward-rate-mannwhitney-active-pd62",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.06487886062113085,
+   "n": [
+    28,
+    9
+   ],
+   "mean": [
+    0.2633219954648526,
+    0.22592592592592592
+   ],
+   "sem": [
+    0.04246767244978868,
+    0.01245705930284603
+   ]
+  },
+  "Passive dendrites cRew vs. nRew early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-student-t-active-pd62",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 0.895746729291422,
+   "n": [
+    28,
+    62
+   ],
+   "mean": [
+    5.659532790013695,
+    5.6528164337171045
+   ],
+   "sem": [
+    0.04615339471725565,
+    0.027322357779203253
+   ]
+  },
+  "Passive dendrites cRew vs. nRew early reward rate.svg": {
+   "state": "v10-reward-rate-mannwhitney-active-pd62",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.11682012214576518,
+   "n": [
+    28,
+    62
+   ],
+   "mean": [
+    0.2633219954648526,
+    0.20133361262393523
+   ],
+   "sem": [
+    0.04246767244978868,
+    0.02356528316032755
+   ]
+  },
+  "Passive dendrites nRew vs. nHIT early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.11342765157294414,
+   "n": [
+    29,
+    21
+   ],
+   "mean": [
+    0.2832325720256755,
+    0.17255892255892255
+   ],
+   "sem": [
+    0.04058115907969073,
+    0.016635868147868143
+   ]
+  },
+  "Passive_dendrites cRew vs. NO_DREADDs cHIT early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.47281304053587747,
+   "n": [
+    18,
+    5
+   ],
+   "mean": [
+    0.33641975308641975,
+    0.25
+   ],
+   "sem": [
+    0.05949229337833974,
+    0.0
+   ]
+  },
+  "Passive_dendrites nRew vs. NO_DREADDs nHIT early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.11342765157294414,
+   "n": [
+    29,
+    21
+   ],
+   "mean": [
+    0.2832325720256755,
+    0.17255892255892255
+   ],
+   "sem": [
+    0.04058115907969073,
+    0.016635868147868143
+   ]
+  },
+  "hM4D dendrites post-CNO cHIT vs. nHIT early reward ev_duration.svg": {
+   "state": "v10-reward-ev-duration-paired-t-modulated",
+   "test": "paired t (scipy ttest_rel)",
+   "p": 0.7941008092176196,
+   "n_pairs": 115
+  },
+  "hM4D dendrites post-CNO cHIT vs. nHIT early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.7766619120399623,
+   "n": [
+    122,
+    159
+   ],
+   "mean": [
+    5.605939692329888,
+    5.596921059224129
+   ],
+   "sem": [
+    0.01957912935818194,
+    0.013742782620512551
+   ]
+  },
+  "hM4D dendrites post-CNO cHIT vs. nHIT early reward peak.svg": {
+   "state": "v10-reward-ev-onset-peak-student-t-modulated",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 0.5396290411050414,
+   "n": [
+    122,
+    159
+   ],
+   "mean": [
+    4.87060375182618,
+    5.002052856958595
+   ],
+   "sem": [
+    0.16439987858504693,
+    0.13871396457471571
+   ]
+  },
+  "hM4D dendrites post-CNO cHIT vs. nHIT early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 4.1042097084544584e-05,
+   "n": [
+    122,
+    159
+   ],
+   "mean": [
+    0.1421344016729237,
+    0.10225089381230928
+   ],
+   "sem": [
+    0.008684970839662857,
+    0.005767781437239299
+   ]
+  },
+  "hM4D dendrites post-CNO cHIT vs. nHIT stim ev_onset.svg": {
+   "state": "v10-stimulus-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.2834677602343091,
+   "n": [
+    76,
+    97
+   ],
+   "mean": [
+    3.3062141740489834,
+    3.3247164799936058
+   ],
+   "sem": [
+    0.01281401394573381,
+    0.009007450991677724
+   ]
+  },
+  "hM4D dendrites post-CNO cHIT vs. nHIT stim rate.svg": {
+   "state": "v10-stimulus-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 2.0703108295190157e-06,
+   "n": [
+    76,
+    97
+   ],
+   "mean": [
+    0.13605425486739647,
+    0.09052902398929621
+   ],
+   "sem": [
+    0.008945164505467305,
+    0.007162695578900261
+   ]
+  },
+  "hM4D dendrites pre-CNO cHIT vs. nHIT early reward ev_duration.svg": {
+   "state": "v10-reward-ev-duration-paired-t-modulated",
+   "test": "paired t (scipy ttest_rel)",
+   "p": 0.8920736191771177,
+   "n_pairs": 62
+  },
+  "hM4D dendrites pre-CNO cHIT vs. nHIT early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.004029990070174085,
+   "n": [
+    63,
+    96
+   ],
+   "mean": [
+    5.553294218310721,
+    5.685021403926107
+   ],
+   "sem": [
+    0.031620285198211445,
+    0.022095706642453264
+   ]
+  },
+  "hM4D dendrites pre-CNO cHIT vs. nHIT early reward peak.svg": {
+   "state": "v10-reward-ev-onset-peak-student-t-modulated",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 0.9645317316902045,
+   "n": [
+    63,
+    96
+   ],
+   "mean": [
+    5.808246419324578,
+    5.821126082984782
+   ],
+   "sem": [
+    0.19987215365386404,
+    0.19403467742336333
+   ]
+  },
+  "hM4D dendrites pre-CNO cHIT vs. nHIT early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.013245679282115048,
+   "n": [
+    63,
+    96
+   ],
+   "mean": [
+    0.20128495842781552,
+    0.16652777777777777
+   ],
+   "sem": [
+    0.012536435085685168,
+    0.010718628834459898
+   ]
+  },
+  "hM4D dendrites pre-CNO cHIT vs. nHIT stim ev_onset.svg": {
+   "state": "v10-stimulus-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.42806182178573016,
+   "n": [
+    8,
+    23
+   ],
+   "mean": [
+    3.3835258525852585,
+    3.3309417898311566
+   ],
+   "sem": [
+    0.03124468582921277,
+    0.024432931852903874
+   ]
+  },
+  "hM4D dendrites pre-CNO cHIT vs. nHIT stim rate.svg": {
+   "state": "v10-stimulus-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 3.667048508882775e-05,
+   "n": [
+    8,
+    23
+   ],
+   "mean": [
+    0.20357142857142854,
+    0.06894409937888199
+   ],
+   "sem": [
+    0.036794877004291404,
+    0.0055850686301485665
+   ]
+  },
+  "hM4D dendrites pre-CNO vs. post-CNO Hit early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.004387942042242653,
+   "n": [
+    97,
+    166
+   ],
+   "mean": [
+    5.6679792795185255,
+    5.5974910779298686
+   ],
+   "sem": [
+    0.02095777177829466,
+    0.01169151310904347
+   ]
+  },
+  "hM4D dendrites pre-CNO vs. post-CNO Hit early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.0002853309998506959,
+   "n": [
+    97,
+    166
+   ],
+   "mean": [
+    0.1290545952510141,
+    0.0918085134078388
+   ],
+   "sem": [
+    0.00821350894863166,
+    0.004954151730778695
+   ]
+  },
+  "hM4D dendrites pre-CNO vs. post-CNO Hit stim ev_onset.svg": {
+   "state": "v10-stimulus-ev-onset-student-t-modulated",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 0.27283669102970776,
+   "n": [
+    27,
+    102
+   ],
+   "mean": [
+    3.340626655258118,
+    3.3207194516796705
+   ],
+   "sem": [
+    0.019585154496728985,
+    0.007736358340302378
+   ]
+  },
+  "hM4D dendrites pre-CNO vs. post-CNO Hit stim rate.svg": {
+   "state": "v10-stimulus-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.0009624909863760971,
+   "n": [
+    27,
+    102
+   ],
+   "mean": [
+    0.045762554534484357,
+    0.08229114705242825
+   ],
+   "sem": [
+    0.004472759303732062,
+    0.005904970729168321
+   ]
+  },
+  "hM4D dendrites pre-CNO vs. post-CNO cHIT early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.39252329544965936,
+   "n": [
+    63,
+    122
+   ],
+   "mean": [
+    5.553294218310721,
+    5.605939692329888
+   ],
+   "sem": [
+    0.031620285198211445,
+    0.01957912935818194
+   ]
+  },
+  "hM4D dendrites pre-CNO vs. post-CNO cHIT early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 1.9750670620526662e-05,
+   "n": [
+    63,
+    122
+   ],
+   "mean": [
+    0.20128495842781552,
+    0.1421344016729237
+   ],
+   "sem": [
+    0.012536435085685168,
+    0.008684970839662857
+   ]
+  },
+  "hM4D dendrites pre-CNO vs. post-CNO cHIT stim ev_onset.svg": {
+   "state": "v10-stimulus-ev-onset-student-t-modulated",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 0.06196578489635797,
+   "n": [
+    8,
+    76
+   ],
+   "mean": [
+    3.3835258525852585,
+    3.3062141740489834
+   ],
+   "sem": [
+    0.03124468582921277,
+    0.01281401394573381
+   ]
+  },
+  "hM4D dendrites pre-CNO vs. post-CNO cHIT stim rate.svg": {
+   "state": "v10-stimulus-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.04048894337120843,
+   "n": [
+    8,
+    76
+   ],
+   "mean": [
+    0.20357142857142854,
+    0.13605425486739647
+   ],
+   "sem": [
+    0.036794877004291404,
+    0.008945164505467305
+   ]
+  },
+  "hM4D dendrites pre-CNO vs. post-CNO nHIT early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.0009314566716864741,
+   "n": [
+    96,
+    159
+   ],
+   "mean": [
+    5.685021403926107,
+    5.596921059224129
+   ],
+   "sem": [
+    0.022095706642453264,
+    0.013742782620512551
+   ]
+  },
+  "hM4D dendrites pre-CNO vs. post-CNO nHIT early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 1.0527113411353848e-07,
+   "n": [
+    96,
+    159
+   ],
+   "mean": [
+    0.16652777777777777,
+    0.10225089381230928
+   ],
+   "sem": [
+    0.010718628834459898,
+    0.005767781437239299
+   ]
+  },
+  "hM4D dendrites pre-CNO vs. post-CNO nHIT stim ev_onset.svg": {
+   "state": "v10-stimulus-ev-onset-student-t-modulated",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 0.7772654417228521,
+   "n": [
+    23,
+    97
+   ],
+   "mean": [
+    3.3309417898311566,
+    3.3247164799936058
+   ],
+   "sem": [
+    0.024432931852903874,
+    0.009007450991677724
+   ]
+  },
+  "hM4D dendrites pre-CNO vs. post-CNO nHIT stim rate.svg": {
+   "state": "v10-stimulus-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.8779369442032351,
+   "n": [
+    23,
+    97
+   ],
+   "mean": [
+    0.06894409937888199,
+    0.09052902398929621
+   ],
+   "sem": [
+    0.0055850686301485665,
+    0.007162695578900261
+   ]
+  },
+  "non-consecutive-normalized Passive axons cRew vs. cHIT early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-peak-student-t-modulated",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 0.011823787019906879,
+   "n": [
+    104,
+    67
+   ],
+   "mean": [
+    1.0534367108397373,
+    0.8697981036581415
+   ],
+   "sem": [
+    0.05074279231540586,
+    0.043257521557915145
+   ]
+  },
+  "non-consecutive-normalized Passive axons cRew vs. cHIT early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.020424984250050238,
+   "n": [
+    104,
+    67
+   ],
+   "mean": [
+    1.1221499840258002,
+    1.312318077661485
+   ],
+   "sem": [
+    0.053399117582164694,
+    0.07348635019189317
+   ]
+  },
+  "non-consecutive-normalized Passive dendrites cRew vs. cHIT early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-student-t-active-pd62",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 0.03808800740115506,
+   "n": [
+    28,
+    9
+   ],
+   "mean": [
+    1.0011881433574474,
+    0.9680230384042601
+   ],
+   "sem": [
+    0.008164672470516915,
+    0.009159915778378132
+   ]
+  },
+  "non-consecutive-normalized Passive dendrites cRew vs. cHIT early reward rate.svg": {
+   "state": "v10-reward-rate-mannwhitney-active-pd62",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.036387507067504474,
+   "n": [
+    28,
+    9
+   ],
+   "mean": [
+    1.3078888916412759,
+    1.4025381251999574
+   ],
+   "sem": [
+    0.21093185532369466,
+    0.07733287150872058
+   ]
+  }
+ }
+}

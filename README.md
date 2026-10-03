@@ -120,6 +120,23 @@ Every output is written through the artifact store with a `provenance.json`
 sidecar. The regression suite (`tests/regression/`, marker `requires_data`)
 pins the recorded notebook numbers and is skipped where the dataset is absent.
 
+### Reproducing the published comparison figures
+
+The manuscript's comparison figures were not produced by a single notebook
+run: the notebooks were re-run with different switches between saves
+(modulated vs active ROIs, the statistical test, the passive-dendrite window).
+The package ships the recovered recipe as a **figure manifest**,
+`src/calcium2p/cohort/manifests/v10_figures.yaml`: one config per notebook
+state, 57 figures in 7 states, each with the y-limits of its original.
+
+```bash
+uv run python scripts/run_figure_manifest.py      # all 57, into the artifact store
+```
+
+Each figure's n, means, SEM and p are pinned in
+`tests/regression/test_v10_manifest.py`. Two published figures are not
+reproduced and are excluded; the manifest's `notes` names them.
+
 ## License
 
 MIT

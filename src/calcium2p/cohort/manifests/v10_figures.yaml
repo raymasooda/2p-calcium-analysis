@@ -1,0 +1,745 @@
+# V10 manuscript figure manifest -- the recovered recipe of every published
+# comparison figure that the reproduction matched data-exactly.
+#
+# Recovered by re-running the original notebooks verbatim and recording the
+# notebook state at each figure's save time. Every entry was validated against
+# its original SVG; re-validate before editing by hand.
+#
+# Each state is one notebook configuration (one modulation window, one set of
+# switches); the notebooks were re-run with different switches between saves,
+# so a single run cannot reproduce them all. Recovered differences between
+# states: modulated vs active ROIs, the statistical test (and paired vs
+# unpaired), the passive_dendrites window (5.1-6.1 s for the earlier saves,
+# 5.1-6.2 s later), and one normalized onset figure measured from reward time.
+# y-limits are read from each original SVG's tick marks.
+#
+# Load with calcium2p.core.cohort_config.load_figure_manifest().
+
+defaults:
+  legacy_faithful: true
+  event_source: reference
+  data_subdir: manuscript/V10
+  fps_by_cohort:
+    task_axons: 30.54
+    NO_DREADDs: 30.3
+    passive: 30.54
+    default: 30.3
+  notes: 'Excluded (not reproduced): non-consecutive-normalized Passive axons cRew vs. cHIT early reward
+    norm_rate.svg -- normalization not identified; Passive dendrites nRew vs. nHIT early reward ev_onset.svg
+    -- ROI count matches but the passive-dendrite event set differs'
+states:
+- run_id: v10-reward-rate-mannwhitney-active-pd62
+  alignment: reward
+  epochs:
+  - name: early reward
+    default_window: [5.1, 6.1]
+    per_protocol:
+      NO_DREADDs: [5.05, 5.8]
+      passive_dendrites: [5.1, 6.2]
+  modulation:
+    epoch: early reward
+    threshold: median
+  comparisons:
+  - name: NO_DREADDs cHIT vs. nHIT
+    a: [NO_DREADDs, cHIT]
+    b: [NO_DREADDs, nHIT]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    roi_set: active
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.0]
+  - name: Passive dendrites cRew vs. cHIT
+    a: [passive_dendrites, cRew]
+    b: [NO_DREADDs, cHIT]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    roi_set: active
+    p_threshold: 1.0
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.05]
+  - name: Passive dendrites cRew vs. cHIT
+    a: [passive_dendrites, cRew]
+    b: [NO_DREADDs, cHIT]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    roi_set: active
+    p_threshold: 1.0
+    normalize:
+      a_reference: [passive_dendrites, nRew]
+      b_reference: [NO_DREADDs, nHIT]
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.45, 4.05]
+  - name: Passive dendrites cRew vs. nRew
+    a: [passive_dendrites, cRew]
+    b: [passive_dendrites, nRew]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    roi_set: active
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.0]
+- run_id: v10-reward-ev-onset-student-t-active-pd62
+  alignment: reward
+  epochs:
+  - name: early reward
+    default_window: [5.1, 6.1]
+    per_protocol:
+      NO_DREADDs: [5.05, 5.8]
+      passive_dendrites: [5.1, 6.2]
+  modulation:
+    epoch: early reward
+    threshold: median
+  comparisons:
+  - name: NO_DREADDs cHIT vs. nHIT
+    a: [NO_DREADDs, cHIT]
+    b: [NO_DREADDs, nHIT]
+    metric: ev_onset
+    epoch: early reward
+    test: student_t
+    roi_set: active
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [5.0, 6.55]
+  - name: Passive dendrites cRew vs. cHIT
+    a: [passive_dendrites, cRew]
+    b: [NO_DREADDs, cHIT]
+    metric: ev_onset
+    epoch: early reward
+    test: student_t
+    roi_set: active
+    p_threshold: 1.0
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.05]
+  - name: Passive dendrites cRew vs. cHIT
+    a: [passive_dendrites, cRew]
+    b: [NO_DREADDs, cHIT]
+    metric: ev_onset
+    epoch: early reward
+    test: student_t
+    roi_set: active
+    p_threshold: 1.0
+    normalize:
+      a_reference: [passive_dendrites, nRew]
+      b_reference: [NO_DREADDs, nHIT]
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.9, 1.1]
+  - name: Passive dendrites cRew vs. nRew
+    a: [passive_dendrites, cRew]
+    b: [passive_dendrites, nRew]
+    metric: ev_onset
+    epoch: early reward
+    test: student_t
+    roi_set: active
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [5.0, 6.55]
+- run_id: v10-reward-ev-duration-paired-t-modulated
+  alignment: reward
+  epochs:
+  - name: early reward
+    default_window: [5.1, 6.1]
+    per_protocol:
+      NO_DREADDs: [5.05, 5.8]
+  modulation:
+    epoch: early reward
+    threshold: median
+  comparisons:
+  - name: Axons cHIT vs. nHIT
+    a: [task_axons, cHIT]
+    b: [task_axons, nHIT]
+    metric: ev_duration
+    epoch: early reward
+    test: paired_t
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 0.5665]
+  - name: Control dendrites post-CNO cHIT vs. nHIT
+    a: [control_dendrites (post-CNO), cHIT]
+    b: [control_dendrites (post-CNO), nHIT]
+    metric: ev_duration
+    epoch: early reward
+    test: paired_t
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.2628]
+  - name: Control dendrites pre-CNO cHIT vs. nHIT
+    a: [control_dendrites (pre-CNO), cHIT]
+    b: [control_dendrites (pre-CNO), nHIT]
+    metric: ev_duration
+    epoch: early reward
+    test: paired_t
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.1883]
+  - name: hM4D dendrites post-CNO cHIT vs. nHIT
+    a: [task_dendrites (post-CNO), cHIT]
+    b: [task_dendrites (post-CNO), nHIT]
+    metric: ev_duration
+    epoch: early reward
+    test: paired_t
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.3611]
+  - name: hM4D dendrites pre-CNO cHIT vs. nHIT
+    a: [task_dendrites (pre-CNO), cHIT]
+    b: [task_dendrites (pre-CNO), nHIT]
+    metric: ev_duration
+    epoch: early reward
+    test: paired_t
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.5327]
+- run_id: v10-reward-ev-onset-rate-mannwhitney-modulated
+  alignment: reward
+  epochs:
+  - name: early reward
+    default_window: [5.1, 6.1]
+    per_protocol:
+      NO_DREADDs: [5.05, 5.8]
+  modulation:
+    epoch: early reward
+    threshold: median
+  comparisons:
+  - name: Axons cHIT vs. nHIT
+    a: [task_axons, cHIT]
+    b: [task_axons, nHIT]
+    metric: ev_onset
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [5.0, 6.05]
+  - name: Control dendrites post-CNO cHIT vs. nHIT
+    a: [control_dendrites (post-CNO), cHIT]
+    b: [control_dendrites (post-CNO), nHIT]
+    metric: ev_onset
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [5.0, 6.05]
+  - name: Control dendrites pre-CNO cHIT vs. nHIT
+    a: [control_dendrites (pre-CNO), cHIT]
+    b: [control_dendrites (pre-CNO), nHIT]
+    metric: ev_onset
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [5.0, 6.05]
+  - name: Passive axons cRew vs. nRew
+    a: [passive_axons, cRew]
+    b: [passive_axons, nRew]
+    metric: ev_onset
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [5.0, 6.05]
+  - name: hM4D dendrites post-CNO cHIT vs. nHIT
+    a: [task_dendrites (post-CNO), cHIT]
+    b: [task_dendrites (post-CNO), nHIT]
+    metric: ev_onset
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [5.0, 6.05]
+  - name: hM4D dendrites pre-CNO cHIT vs. nHIT
+    a: [task_dendrites (pre-CNO), cHIT]
+    b: [task_dendrites (pre-CNO), nHIT]
+    metric: ev_onset
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [5.0, 6.05]
+  - name: hM4D dendrites pre-CNO vs. post-CNO Hit
+    a: [task_dendrites (pre-CNO), HIT]
+    b: [task_dendrites (post-CNO), HIT]
+    metric: ev_onset
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [5.0, 6.0]
+  - name: hM4D dendrites pre-CNO vs. post-CNO cHIT
+    a: [task_dendrites (pre-CNO), cHIT]
+    b: [task_dendrites (post-CNO), cHIT]
+    metric: ev_onset
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [5.0, 6.0]
+  - name: hM4D dendrites pre-CNO vs. post-CNO nHIT
+    a: [task_dendrites (pre-CNO), nHIT]
+    b: [task_dendrites (post-CNO), nHIT]
+    metric: ev_onset
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [5.0, 6.0]
+  - name: Axons cHIT vs. nHIT
+    a: [task_axons, cHIT]
+    b: [task_axons, nHIT]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.05]
+  - name: Control dendrites post-CNO cHIT vs. nHIT
+    a: [control_dendrites (post-CNO), cHIT]
+    b: [control_dendrites (post-CNO), nHIT]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.05]
+  - name: Control dendrites pre-CNO cHIT vs. nHIT
+    a: [control_dendrites (pre-CNO), cHIT]
+    b: [control_dendrites (pre-CNO), nHIT]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.05]
+  - name: Control dendrites pre-CNO vs. post-CNO Hit
+    a: [control_dendrites (pre-CNO), HIT]
+    b: [control_dendrites (post-CNO), HIT]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 0.3]
+  - name: Passive axons cRew vs. cHIT
+    a: [passive_axons, cRew]
+    b: [task_axons, cHIT]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.0
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.5, 1.5]
+  - name: Passive axons cRew vs. cHIT
+    a: [passive_axons, cRew]
+    b: [task_axons, cHIT]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.0
+    normalize:
+      a_reference: [passive_axons, nRew]
+      b_reference: [task_axons, nHIT]
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 3.5]
+  - name: Passive axons cRew vs. nRew
+    a: [passive_axons, cRew]
+    b: [passive_axons, nRew]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.05]
+  - name: Passive dendrites nRew vs. nHIT
+    a: [passive_dendrites, nRew]
+    b: [NO_DREADDs, nHIT]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.05]
+  - name: Passive_dendrites cRew vs. NO_DREADDs cHIT
+    a: [passive_dendrites, cRew]
+    b: [NO_DREADDs, cHIT]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.0]
+  - name: Passive_dendrites nRew vs. NO_DREADDs nHIT
+    a: [passive_dendrites, nRew]
+    b: [NO_DREADDs, nHIT]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.0]
+  - name: hM4D dendrites post-CNO cHIT vs. nHIT
+    a: [task_dendrites (post-CNO), cHIT]
+    b: [task_dendrites (post-CNO), nHIT]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 0.6]
+  - name: hM4D dendrites pre-CNO cHIT vs. nHIT
+    a: [task_dendrites (pre-CNO), cHIT]
+    b: [task_dendrites (pre-CNO), nHIT]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 0.6]
+  - name: hM4D dendrites pre-CNO vs. post-CNO Hit
+    a: [task_dendrites (pre-CNO), HIT]
+    b: [task_dendrites (post-CNO), HIT]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 0.4]
+  - name: hM4D dendrites pre-CNO vs. post-CNO cHIT
+    a: [task_dendrites (pre-CNO), cHIT]
+    b: [task_dendrites (post-CNO), cHIT]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 0.25]
+  - name: hM4D dendrites pre-CNO vs. post-CNO nHIT
+    a: [task_dendrites (pre-CNO), nHIT]
+    b: [task_dendrites (post-CNO), nHIT]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 0.25]
+- run_id: v10-reward-ev-onset-peak-student-t-modulated
+  alignment: reward
+  epochs:
+  - name: early reward
+    default_window: [5.1, 6.1]
+    per_protocol:
+      NO_DREADDs: [5.05, 5.8]
+  modulation:
+    epoch: early reward
+    threshold: median
+  comparisons:
+  - name: Control dendrites pre-CNO vs. post-CNO Hit
+    a: [control_dendrites (pre-CNO), HIT]
+    b: [control_dendrites (post-CNO), HIT]
+    metric: ev_onset
+    epoch: early reward
+    test: student_t
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [5.0, 6.0]
+  - name: Passive axons cRew vs. cHIT
+    a: [passive_axons, cRew]
+    b: [task_axons, cHIT]
+    metric: ev_onset
+    epoch: early reward
+    test: student_t
+    roi_set: modulated
+    p_threshold: 1.0
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.05]
+  - name: Passive axons cRew vs. cHIT
+    a: [passive_axons, cRew]
+    b: [task_axons, cHIT]
+    metric: ev_onset
+    epoch: early reward
+    test: student_t
+    roi_set: modulated
+    p_threshold: 1.0
+    normalize:
+      a_reference: [passive_axons, nRew]
+      b_reference: [task_axons, nHIT]
+      offset: 5.0
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 2.5]
+  - name: Axons cHIT vs. nHIT
+    a: [task_axons, cHIT]
+    b: [task_axons, nHIT]
+    metric: peak
+    epoch: early reward
+    test: student_t
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.2422]
+  - name: Control dendrites post-CNO cHIT vs. nHIT
+    a: [control_dendrites (post-CNO), cHIT]
+    b: [control_dendrites (post-CNO), nHIT]
+    metric: peak
+    epoch: early reward
+    test: student_t
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 4.793]
+  - name: Control dendrites pre-CNO cHIT vs. nHIT
+    a: [control_dendrites (pre-CNO), cHIT]
+    b: [control_dendrites (pre-CNO), nHIT]
+    metric: peak
+    epoch: early reward
+    test: student_t
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 4.9548]
+  - name: hM4D dendrites post-CNO cHIT vs. nHIT
+    a: [task_dendrites (post-CNO), cHIT]
+    b: [task_dendrites (post-CNO), nHIT]
+    metric: peak
+    epoch: early reward
+    test: student_t
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 5.3978]
+  - name: hM4D dendrites pre-CNO cHIT vs. nHIT
+    a: [task_dendrites (pre-CNO), cHIT]
+    b: [task_dendrites (pre-CNO), nHIT]
+    metric: peak
+    epoch: early reward
+    test: student_t
+    roi_set: modulated
+    p_threshold: 1.5
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 6.3159]
+- run_id: v10-stimulus-ev-onset-rate-mannwhitney-modulated
+  alignment: stimulus
+  epochs:
+  - name: stim
+    default_window: [3.1, 3.5]
+  modulation:
+    epoch: stim
+    threshold: median
+  comparisons:
+  - name: Axons cHIT vs. nHIT
+    a: [task_axons, cHIT]
+    b: [task_axons, nHIT]
+    metric: ev_onset
+    epoch: stim
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.0
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [3.0, 3.6]
+  - name: hM4D dendrites post-CNO cHIT vs. nHIT
+    a: [task_dendrites (post-CNO), cHIT]
+    b: [task_dendrites (post-CNO), nHIT]
+    metric: ev_onset
+    epoch: stim
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.0
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 0.55]
+  - name: hM4D dendrites pre-CNO cHIT vs. nHIT
+    a: [task_dendrites (pre-CNO), cHIT]
+    b: [task_dendrites (pre-CNO), nHIT]
+    metric: ev_onset
+    epoch: stim
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.0
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 0.55]
+  - name: Axons cHIT vs. nHIT
+    a: [task_axons, cHIT]
+    b: [task_axons, nHIT]
+    metric: rate
+    epoch: stim
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.0
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.05]
+  - name: hM4D dendrites post-CNO cHIT vs. nHIT
+    a: [task_dendrites (post-CNO), cHIT]
+    b: [task_dendrites (post-CNO), nHIT]
+    metric: rate
+    epoch: stim
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.0
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 0.55]
+  - name: hM4D dendrites pre-CNO cHIT vs. nHIT
+    a: [task_dendrites (pre-CNO), cHIT]
+    b: [task_dendrites (pre-CNO), nHIT]
+    metric: rate
+    epoch: stim
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.0
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 0.55]
+  - name: hM4D dendrites pre-CNO vs. post-CNO Hit
+    a: [task_dendrites (pre-CNO), HIT]
+    b: [task_dendrites (post-CNO), HIT]
+    metric: rate
+    epoch: stim
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.0
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.0]
+  - name: hM4D dendrites pre-CNO vs. post-CNO cHIT
+    a: [task_dendrites (pre-CNO), cHIT]
+    b: [task_dendrites (post-CNO), cHIT]
+    metric: rate
+    epoch: stim
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.0
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.0]
+  - name: hM4D dendrites pre-CNO vs. post-CNO nHIT
+    a: [task_dendrites (pre-CNO), nHIT]
+    b: [task_dendrites (post-CNO), nHIT]
+    metric: rate
+    epoch: stim
+    test: mannwhitney
+    roi_set: modulated
+    p_threshold: 1.0
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [0.0, 1.0]
+- run_id: v10-stimulus-ev-onset-student-t-modulated
+  alignment: stimulus
+  epochs:
+  - name: stim
+    default_window: [3.1, 3.5]
+  modulation:
+    epoch: stim
+    threshold: median
+  comparisons:
+  - name: hM4D dendrites pre-CNO vs. post-CNO Hit
+    a: [task_dendrites (pre-CNO), HIT]
+    b: [task_dendrites (post-CNO), HIT]
+    metric: ev_onset
+    epoch: stim
+    test: student_t
+    roi_set: modulated
+    p_threshold: 1.0
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [3.0, 3.5]
+  - name: hM4D dendrites pre-CNO vs. post-CNO cHIT
+    a: [task_dendrites (pre-CNO), cHIT]
+    b: [task_dendrites (post-CNO), cHIT]
+    metric: ev_onset
+    epoch: stim
+    test: student_t
+    roi_set: modulated
+    p_threshold: 1.0
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [3.0, 3.5]
+  - name: hM4D dendrites pre-CNO vs. post-CNO nHIT
+    a: [task_dendrites (pre-CNO), nHIT]
+    b: [task_dendrites (post-CNO), nHIT]
+    metric: ev_onset
+    epoch: stim
+    test: student_t
+    roi_set: modulated
+    p_threshold: 1.0
+    figure:
+      figsize: [1.585, 2.0]
+      ylim: [3.0, 3.5]

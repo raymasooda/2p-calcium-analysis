@@ -76,6 +76,8 @@ jobs:
               echo "::error::Subject exceeds 72 chars: $sha $subject"
               failed=1
             fi
-          done < <(git log --format='%H %s' origin/${{ github.base_ref }}..HEAD)
+          # --no-merges: on pull_request the checkout is GitHub's synthetic
+          # "Merge <head> into <base>" commit, and merging a PR in the web UI
+          # adds real merge commits; neither is authored, so neither is linted
+          done < <(git log --no-merges --format='%H %s' origin/${{ github.base_ref }}..HEAD)
           exit $failed
-

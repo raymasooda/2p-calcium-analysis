@@ -33,7 +33,7 @@ from calcium2p.cohort.grouping import (
 from calcium2p.cohort.metrics import comparison_frame, event_metrics_by_roi, normalize_by_reference
 from calcium2p.cohort.modulation import modulated_rois, modulation_index, modulation_proportions
 from calcium2p.cohort.stats import run_comparison
-from calcium2p.core.cohort_config import CohortConfig
+from calcium2p.core.cohort_config import CohortConfig, ComparisonSpec
 from calcium2p.core.paths import data_root
 from calcium2p.io.legacy import read_reference_events, read_reference_frequencies
 from calcium2p.provenance.provenance_utils import compute_checksum
@@ -157,6 +157,34 @@ def _split_frequency_tables(combined: pd.DataFrame) -> dict[str, pd.DataFrame]:
     for stem, piece in combined.groupby("stem", sort=False):
         out[str(stem)] = piece.drop(columns=["stem"]).set_index(["level_0", "level_1"])
     return out
+
+
+# -- figure naming ---------------------------------------------------------------
+
+_NORMALIZED_PREFIX = "non-consecutive-normalized "
+
+
+def figure_filename(spec: ComparisonSpec) -> str:
+    """Return the notebooks' saved filename for a comparison figure.
+
+    ``f"{title} {epoch} {metric}.svg"``, with the ``non-consecutive-normalized``
+    prefix for normalized comparisons -- the name the original artifact carries,
+    so package output can be matched to it.
+    """
+    prefix = _NORMALIZED_PREFIX if spec.normalize is not None else ""
+    return f"{prefix}{spec.name} {spec.epoch} {spec.metric}.svg"
+
+
+def figure_key(run_id: str, spec: ComparisonSpec, mode: str) -> str:
+    """Return the artifact-store key of a comparison figure.
+
+    The normalization prefix is part of the key: a normalized comparison
+    shares its name and metric with the plain one, and a shared key would make
+    the store serve the cached plain figure in place of the normalized one.
+    """
+    prefix = _NORMALIZED_PREFIX if spec.normalize is not None else ""
+    slug = f"{prefix}{spec.name}".replace(" ", "_").replace(".", "").replace("/", "-")
+    return f"{run_id}/figures/{slug}/{spec.metric}/{mode}"
 
 
 # -- the orchestrator ----------------------------------------------------------
@@ -290,6 +318,7 @@ def run_onset_analysis(  # noqa: PLR0915 - the linear orchestration reads best u
         if spec.normalize is not None:
             frame = normalize_by_reference(frame, spec.a, spec.b, spec.normalize)
         result = run_comparison(frame, spec)
+        fig_key = figure_key(config.run_id, spec, mode)
         results.append(
             {
                 "name": spec.name,
@@ -297,11 +326,13 @@ def run_onset_analysis(  # noqa: PLR0915 - the linear orchestration reads best u
                 "epoch": spec.epoch,
                 "test": spec.test,
                 **{k: v for k, v in asdict(result).items() if k != "name"},
+                "figure_file": figure_filename(spec),
+                "figure_key": fig_key,
             }
         )
 
         edgecolor, facecolor = comparison_colors(spec.name)
-        prefix = "non-consecutive-normalized " if spec.normalize is not None else ""
+        prefix = _NORMALIZED_PREFIX if spec.normalize is not None else ""
         title = f"{prefix}{spec.name} {spec.epoch} ({result.significance_symbol})"
         figure = comparison_bar(
             frame[spec.a],
@@ -312,8 +343,6 @@ def run_onset_analysis(  # noqa: PLR0915 - the linear orchestration reads best u
             facecolor=facecolor,
         )
         svg = figure_to_svg(figure)
-        slug = spec.name.replace(" ", "_").replace(".", "").replace("/", "-")
-        fig_key = f"{config.run_id}/figures/{slug}/{spec.metric}/{mode}"
         store.get_or_compute(
             fig_key, _return_text, params={"payload": svg}, kind="figure", serializer="svg"
         )
