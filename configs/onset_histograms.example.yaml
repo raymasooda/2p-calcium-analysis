@@ -1,0 +1,122 @@
+# Cohort-level onset-histogram analysis (reward alignment shown; a stimulus run
+# swaps alignment, epochs and comparisons -- see the stimulus block at the end).
+#
+# Copy to configs/onset_histograms.yaml (gitignored) and adjust per machine.
+# Loaded by calcium2p.core.cohort_config.load_cohort_config().
+
+run_id: onset-hist-reward
+alignment: reward            # reward (t = 5 s) | stimulus (t = 3 s)
+
+# legacy_faithful: true reproduces the original notebooks' three counting bugs
+# so outputs validate against the published artifacts:
+#   1. the TD1 exclusion is a no-op (TD1 events pool into the pre-CNO numerator
+#      while the denominator counts only TD0 ROIs),
+#   2. MODIFIED_TD3_CONTROL is dropped from the control post-CNO denominator,
+#   3. passive ROI counts are built from a stale loop variable (FOV_dict leak).
+# false applies the corrected behaviour. Both modes cache side by side.
+legacy_faithful: true
+
+# reference: analyse the original event CSVs; regenerated: analyse event tables
+# rebuilt from the deltaF traces via event_tables below.
+event_source: reference
+
+data_subdir: manuscript/V10   # below DATA_ROOT
+
+datasets:                     # logical name -> filename under data_subdir
+  task_axons_deltaf: deltaF_dict.npy
+  no_dreadds_deltaf: NO_DREADDs_deltaF_dict.npy
+  batch1_deltaf: RGECO_GCaMP_Batch1_deltaF.npy
+  batch3_deltaf: GCaMP_POm_Batch3_deltaF_dict.npy
+  task_dendrites_behavior: task_dendrites_cohort_behavior.npy
+  control_dendrites_behavior: control_dendrites_cohort_behavior.npy
+
+# The notebooks hardcoded both rates in different cells; explicit per cohort.
+fps_by_cohort:
+  task_axons: 30.54
+  NO_DREADDs: 30.3
+  passive: 30.54
+  default: 30.3
+
+# For event_source: regenerated. The upstream code that produced the original
+# CSVs was never committed; these defaults were RECOVERED by fitting against
+# the reference tables (validated 100% exact for task_axons; see
+# calcium2p.cohort.event_tables for the per-group recipes and
+# scripts/validate_reproduction.py for the match-rate report). Onsets are kept
+# strictly inside the family window (both bounds exclusive).
+event_tables:
+  threshold_sd: 2.0
+  min_samples: 6
+  baseline_window_s: [2.0, 3.0]     # pre-stimulus; task-cohort default
+  reward_window_s: [5.0, 7.0]
+  stim_window_s: [3.0, 3.5]
+  baseline_window_overrides:
+    passive_batch1: [0.0, 2.0]
+
+epochs:
+  - name: histogram
+    default_window: [5.0, 6.5]
+  - name: early reward
+    default_window: [5.1, 6.1]
+    per_protocol:
+      NO_DREADDs: [5.05, 5.8]
+      passive_dendrites: [5.1, 6.2]
+  - name: late reward
+    default_window: [6.1, 7.1]
+
+modulation:
+  epoch: early reward
+  threshold: median           # mean | median | half_std
+
+histogram:
+  xmin: 5.0
+  xmax: 6.5
+  nbins: 15
+  roi_div: true               # weight = 1 / nTrials / nROIs
+  sharey: false
+  active_only: true
+
+# Named comparisons replace the notebooks' positional view_comparisons indices.
+# test: student_t (the notebooks' "parametric" unpaired = ttest_ind with
+# equal_var=True) | welch_t | mannwhitney | wilcoxon | paired_t
+comparisons:
+  - name: NO_DREADDs cHIT vs. nHIT
+    a: [NO_DREADDs, cHIT]
+    b: [NO_DREADDs, nHIT]
+    metric: ev_onset
+    epoch: early reward
+    test: student_t
+    roi_set: active
+    figure: {figsize: [1.585, 2.0], ylim: [5.0, 6.55]}
+
+  - name: Passive dendrites cRew vs. nRew
+    a: [passive_dendrites, cRew]
+    b: [passive_dendrites, nRew]
+    metric: ev_onset
+    epoch: early reward
+    test: student_t
+    figure: {figsize: [1.585, 2.0], ylim: [5.0, 6.55]}
+
+  - name: Passive dendrites cRew vs. cHIT
+    a: [passive_dendrites, cRew]
+    b: [NO_DREADDs, cHIT]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    figure: {figsize: [1.585, 2.0], ylim: [0.0, 1.05]}
+
+  - name: non-consecutive-normalized Passive dendrites cRew vs. cHIT
+    a: [passive_dendrites, cRew]
+    b: [NO_DREADDs, cHIT]
+    metric: rate
+    epoch: early reward
+    test: mannwhitney
+    normalize:
+      a_reference: [passive_dendrites, nRew]
+      b_reference: [NO_DREADDs, nHIT]
+    figure: {figsize: [1.585, 2.0], ylim: [0.45, 4.05]}
+
+notes: >
+  Reward-aligned manuscript analysis. For the stimulus run use alignment:
+  stimulus with epochs [{name: histogram, default_window: [3.0, 3.5]},
+  {name: stim, default_window: [3.1, 3.5]}], modulation epoch stim, and the
+  hM4D pre/post-CNO comparisons with roi_set: modulated.

@@ -55,12 +55,15 @@ prevents. Never widen one without testing.
 
 ```
 src/calcium2p/      all real logic; scripts and notebooks import from here
-├── core/           session config, path resolution
-├── io/             suite2p / TIFF / HDF5 loaders
+├── core/           session + cohort config, path resolution
+├── io/             legacy pickle bridge + reference readers (suite2p/TIFF to come)
+├── signal/         filtering, dF/F0, hysteresis event detection (pure functions)
+├── cohort/         onset-histogram manuscript analysis (grouping, modulation,
+│                   metrics, stats, event-table regeneration, validation, run)
 ├── provenance/     git + environment + checksum capture, provenance.json
 ├── artifacts/      materialize-vs-mutation-record policy
 ├── pipeline/       sequential analysis stages
-└── viz/            plotting
+└── viz/            onset histograms, comparison bars, traces, regressions
 
 scripts/            thin CLI entrypoints (logic lives in src/)
 └── scratch/        investigatory scripts; untracked but fully run-logged
@@ -92,6 +95,47 @@ Commit messages follow [Conventional Commits](https://www.conventionalcommits.or
 (`feat` `fix` `docs` `style` `refactor` `perf` `test` `build` `ci` `chore`
 `revert`) — the CI job parses history for them, and `main` advances only by
 merge, never by a direct commit.
+
+## Onset-histogram analysis
+
+The productionized reward/stimulus onset-histogram manuscript analysis lives in
+`calcium2p.cohort`. One-time ingest converts the legacy pickled `.npy` dicts to
+parquet (the pickles reference `pandas.core.indexes.numeric`, deleted in pandas
+2.0, so the converter runs under a uv-provisioned pandas-1.5 interpreter):
+
+```bash
+uv run python scripts/ingest_legacy.py --convert   # once per machine
+uv run python scripts/run_onset_analysis.py --config configs/onset_histograms.yaml
+```
+
+Copy `configs/onset_histograms.example.yaml` to get started. Two flags matter:
+
+- `legacy_faithful: true` (default) reproduces the original notebooks'
+  counting bugs exactly, so outputs validate against the published artifacts;
+  `false` applies the corrected behaviour. Both cache side by side.
+- `event_source: reference | regenerated` selects the original event CSVs or
+  tables rebuilt from the deltaF traces.
+
+Every output is written through the artifact store with a `provenance.json`
+sidecar. The regression suite (`tests/regression/`, marker `requires_data`)
+pins the recorded notebook numbers and is skipped where the dataset is absent.
+
+### Reproducing the published comparison figures
+
+The manuscript's comparison figures were not produced by a single notebook
+run: the notebooks were re-run with different switches between saves
+(modulated vs active ROIs, the statistical test, the passive-dendrite window).
+The package ships the recovered recipe as a **figure manifest**,
+`src/calcium2p/cohort/manifests/v10_figures.yaml`: one config per notebook
+state, 57 figures in 7 states, each with the y-limits of its original.
+
+```bash
+uv run python scripts/run_figure_manifest.py      # all 57, into the artifact store
+```
+
+Each figure's n, means, SEM and p are pinned in
+`tests/regression/test_v10_manifest.py`. Two published figures are not
+reproduced and are excluded; the manifest's `notes` names them.
 
 ## License
 
