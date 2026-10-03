@@ -19,12 +19,17 @@ import pytest
 from calcium2p.artifacts import ArtifactStore
 from calcium2p.cohort.run import run_onset_analysis
 from calcium2p.core.cohort_config import CohortConfig, ComparisonSpec, EpochSpec, ModulationSpec
+from calcium2p.core.paths import DataRootNotConfiguredError, data_root
 
 if TYPE_CHECKING:
     from typing import Any
 
-DATA = Path("/home/raymasooda/data/2p-calcium/manuscript/V10")
-CONVERTED = Path("/home/raymasooda/data/2p-calcium/manuscript/V10_converted")
+try:
+    _MANUSCRIPT = data_root(interactive=False) / "manuscript"
+except DataRootNotConfiguredError:
+    _MANUSCRIPT = Path("/nonexistent")
+DATA = _MANUSCRIPT / "V10"
+CONVERTED = _MANUSCRIPT / "V10_converted"
 
 pytestmark = [
     pytest.mark.requires_data,
