@@ -20,7 +20,9 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 @pytest.fixture
 def git_repo(tmp_path: Path) -> Path:
     """A throwaway git repo with one commit, for provenance tests."""
-    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=tmp_path, check=True)
+    # `git init -b` needs git >= 2.28; pointing HEAD by hand works on any version.
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "symbolic-ref", "HEAD", "refs/heads/main"], cwd=tmp_path, check=True)
     subprocess.run(["git", "config", "user.name", "Test"], cwd=tmp_path, check=True)
     subprocess.run(["git", "config", "user.email", "t@example.com"], cwd=tmp_path, check=True)
     (tmp_path / "seed.txt").write_text("seed\n", encoding="utf-8")
