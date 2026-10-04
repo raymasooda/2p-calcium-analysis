@@ -88,3 +88,51 @@ def test_figure_statistics(stats: pd.DataFrame, figure: str) -> None:
     assert [int(row["n_a"]), int(row["n_b"])] == pinned["n"]
     assert [row["mean_a"], row["mean_b"]] == pytest.approx(pinned["mean"], rel=1e-9)
     assert [row["sem_a"], row["sem_b"]] == pytest.approx(pinned["sem"], rel=1e-9)
+
+
+# -- passive groups re-detected by the methods rule ---------------------------
+
+PASSIVE_FIXTURE = Path(__file__).parent / "fixtures" / "v10_passive_methods_stats.json"
+PASSIVE_PINNED: dict[str, dict[str, Any]] = json.loads(PASSIVE_FIXTURE.read_text(encoding="utf-8"))[
+    "figures"
+]
+
+
+@pytest.fixture(scope="module")
+def passive_methods_stats(tmp_path_factory: pytest.TempPathFactory) -> pd.DataFrame:
+    """Run the passive-methods manifest once, into a throwaway store."""
+    assert DIRS is not None
+    source, converted = DIRS
+    store = ArtifactStore(tmp_path_factory.mktemp("store-passive"))
+    configs = load_figure_manifest(bundled_manifest("v10-passive-methods"))
+    return run_figure_manifest(configs, store, source_dir=source, converted_dir=converted)
+
+
+def test_passive_methods_covers_every_figure(passive_methods_stats: pd.DataFrame) -> None:
+    assert sorted(passive_methods_stats["figure_file"]) == sorted(PINNED)
+    involves_passive = passive_methods_stats["name"].str.contains("assive", regex=False)
+    assert sorted(passive_methods_stats.loc[involves_passive, "figure_file"]) == sorted(
+        PASSIVE_PINNED
+    )
+
+
+@pytest.mark.parametrize("figure", sorted(PASSIVE_PINNED))
+def test_passive_methods_statistics(passive_methods_stats: pd.DataFrame, figure: str) -> None:
+    pinned = PASSIVE_PINNED[figure]
+    row = passive_methods_stats.set_index("figure_file").loc[figure]
+    assert row["state"] == pinned["state"]
+    assert row["p_value"] == pytest.approx(pinned["p"], rel=1e-9, abs=1e-15)
+    assert [int(row["n_a"]), int(row["n_b"])] == pinned["n"]
+    assert [row["mean_a"], row["mean_b"]] == pytest.approx(pinned["mean"], rel=1e-9)
+    assert [row["sem_a"], row["sem_b"]] == pytest.approx(pinned["sem"], rel=1e-9)
+
+
+def test_passive_methods_leaves_other_figures_unchanged(
+    passive_methods_stats: pd.DataFrame, stats: pd.DataFrame
+) -> None:
+    legacy = stats.set_index("figure_file")
+    for row in passive_methods_stats.itertuples():
+        if row.figure_file in PASSIVE_PINNED:
+            continue
+        assert row.p_value == legacy.loc[row.figure_file, "p_value"], row.figure_file
+        assert row.mean_a == legacy.loc[row.figure_file, "mean_a"], row.figure_file
