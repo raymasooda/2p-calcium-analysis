@@ -18,12 +18,15 @@ shape the repo's OOP rule forbids.
 
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import asdict
 from functools import partial
 from typing import TYPE_CHECKING, Any
 
 import pandas as pd
 
+from calcium2p.cohort.event_tables import GROUP_RECIPES, build_event_tables
 from calcium2p.cohort.grouping import (
     TrialCounts,
     build_roi_denominators,
@@ -33,7 +36,7 @@ from calcium2p.cohort.grouping import (
 from calcium2p.cohort.metrics import comparison_frame, event_metrics_by_roi, normalize_by_reference
 from calcium2p.cohort.modulation import modulated_rois, modulation_index, modulation_proportions
 from calcium2p.cohort.stats import run_comparison
-from calcium2p.core.cohort_config import CohortConfig, ComparisonSpec
+from calcium2p.core.cohort_config import CohortConfig, ComparisonSpec, EventTableParams
 from calcium2p.core.paths import data_root
 from calcium2p.io.legacy import read_reference_events, read_reference_frequencies
 from calcium2p.provenance.provenance_utils import compute_checksum
@@ -74,6 +77,18 @@ def load_converted_table(*, path: str, sha256: str) -> pd.DataFrame:
     return pd.read_parquet(path)
 
 
+def _read_reference_files(source_dir: str, suffix: str) -> dict[str, pd.DataFrame]:
+    """Read every ``*{suffix}.csv`` under ``source_dir``, keyed by file stem."""
+    from pathlib import Path  # noqa: PLC0415 - keep module import surface tiny
+
+    files: dict[str, pd.DataFrame] = {}
+    for path in sorted(Path(source_dir).glob(f"*{suffix}.csv")):
+        stem = path.name.replace(f"{suffix}.csv", "")
+        title = stem.split("MODIFIED_")[-1] if "MODIFIED" in stem else stem
+        files[stem] = read_reference_events(path, title)
+    return files
+
+
 def pool_reference_events(
     *,
     source_dir: str,
@@ -88,13 +103,127 @@ def pool_reference_events(
     per-protocol frames are concatenated with ``protocol`` and ``roi_key``
     columns so the store can hold one artifact; downstream code re-splits.
     """
-    from pathlib import Path  # noqa: PLC0415 - keep module import surface tiny
+    return _pool_event_files(
+        _read_reference_files(source_dir, suffix),
+        active_only=active_only,
+        exclude=exclude,
+        legacy_faithful=legacy_faithful,
+    )
 
-    files: dict[str, pd.DataFrame] = {}
-    for path in sorted(Path(source_dir).glob(f"*{suffix}.csv")):
-        stem = path.name.replace(f"{suffix}.csv", "")
-        title = stem.split("MODIFIED_")[-1] if "MODIFIED" in stem else stem
-        files[stem] = read_reference_events(path, title)
+
+def pool_mixed_events(
+    regenerated: pd.DataFrame,
+    *,
+    source_dir: str,
+    suffix: str,
+    side: str,
+    active_only: bool,
+    exclude: tuple[str, ...],
+    legacy_faithful: bool,
+) -> pd.DataFrame:
+    """Pool one side's events, re-detected groups replacing their reference CSVs.
+
+    Ingest boundary for the reference CSVs; ``regenerated`` is the stored
+    output of :func:`regenerate_events`. Each regenerated group stands in for
+    the reference file of the same stem, so file order, grouping, and the
+    active-ROI rule are exactly those of :func:`pool_reference_events`.
+    """
+    files = _read_reference_files(source_dir, suffix)
+    for group, piece in regenerated[regenerated["side"] == side].groupby("group", sort=False):
+        files[str(group)] = _regenerated_frame(piece)
+    return _pool_event_files(
+        files, active_only=active_only, exclude=exclude, legacy_faithful=legacy_faithful
+    )
+
+
+def regenerate_events(
+    *,
+    converted_dir: str,
+    checksums: dict[str, str],
+    params: dict[str, Any],
+    alignment: str,
+    groups: list[str],
+) -> pd.DataFrame:
+    """Re-detect the listed groups' events from the converted traces.
+
+    Ingest boundary: reads the traces and behaviour parquet tables the
+    groups' recipes need (``checksums`` records their bytes). Returns both
+    sides of every group in one long frame -- ``group``, ``side``
+    (``target``/``reference``), ``roi_nlevels`` and ``roi_level_*`` columns
+    plus the per-event columns -- with ``history`` mirroring ``outcome`` for
+    the passive groups, whose outcome label *is* the reward history.
+
+    Raises
+    ------
+    ValueError
+        If a group yields no events (its traces are absent).
+    """
+    from pathlib import Path  # noqa: PLC0415
+
+    del checksums
+    stems = _regeneration_tables(groups)
+    tables = {stem: pd.read_parquet(Path(converted_dir) / f"{stem}.parquet") for stem in stems}
+    built = build_event_tables(
+        tables,
+        EventTableParams.from_mapping(params),
+        alignment="reward" if alignment == "reward" else "stimulus",
+    )
+    pieces = []
+    for group in groups:
+        if group not in built:
+            raise ValueError(f"group {group!r} produced no events; are its traces converted?")
+        for side, frame in built[group].items():
+            piece = frame.reset_index(names=[f"roi_level_{i}" for i in range(frame.index.nlevels)])
+            for column in piece.columns:
+                if str(column).startswith("roi_level_"):
+                    piece[column] = piece[column].astype(str)
+            # the reference CSVs store integer trial numbers; match them so the
+            # pooled frame has one trial dtype
+            if bool(piece["trial"].astype(str).str.fullmatch(r"\d+").all()):
+                piece["trial"] = piece["trial"].astype(int)
+            if any(recipe.outcome_column is None for recipe in GROUP_RECIPES[group]):
+                piece["history"] = piece["outcome"]
+            piece.insert(0, "group", group)
+            piece.insert(1, "side", side)
+            piece.insert(2, "roi_nlevels", frame.index.nlevels)
+            pieces.append(piece)
+    return pd.concat(pieces, ignore_index=True)
+
+
+def _regeneration_tables(groups: list[str]) -> list[str]:
+    """Converted-table stems the groups' regeneration recipes read."""
+    stems: list[str] = []
+    for group in groups:
+        for recipe in GROUP_RECIPES[group]:
+            for stem in (recipe.traces_table, recipe.behavior_table):
+                if stem is not None and stem not in stems:
+                    stems.append(stem)
+    return stems
+
+
+def _regenerated_frame(piece: pd.DataFrame) -> pd.DataFrame:
+    """One group's side of :func:`regenerate_events`, indexed like its reference CSV."""
+    nlevels = int(piece["roi_nlevels"].iloc[0])
+    levels = [f"roi_level_{i}" for i in range(nlevels)]
+    spare = [c for c in piece.columns if str(c).startswith("roi_level_") and c not in levels]
+    frame = piece.drop(columns=["group", "side", "roi_nlevels", *spare])
+    if nlevels == 1:
+        frame = frame.set_index(levels[0])
+        frame.index.name = None
+    else:
+        frame = frame.set_index(levels)
+        frame.index.names = [None] * nlevels
+    return frame
+
+
+def _pool_event_files(
+    files: dict[str, pd.DataFrame],
+    *,
+    active_only: bool,
+    exclude: tuple[str, ...],
+    legacy_faithful: bool,
+) -> pd.DataFrame:
+    """Group per-file event tables and flatten them into one storable frame."""
     events, _ = load_grouped_events(
         files, active_only=active_only, exclude=exclude, legacy_faithful=legacy_faithful
     )
@@ -216,8 +345,11 @@ def run_onset_analysis(  # noqa: PLR0915 - the linear orchestration reads best u
     Returns
     -------
     dict
-        Key results: trial counts, modulation table, per-comparison stats,
-        and the artifact keys written.
+        Key results: the key ``mode`` (legacy flag and event source), trial
+        counts, modulation table, modulated ROI keys per
+        protocol, the pooled events per side (``target``/``reference``) and
+        protocol, the converted tables, per-comparison stats, and the
+        artifact keys written.
     """
     base = data_root() / config.data_subdir
     source = source_dir if source_dir is not None else base
@@ -247,23 +379,19 @@ def run_onset_analysis(  # noqa: PLR0915 - the linear orchestration reads best u
         suffixes = ("_all_500ms_stim_events", "_all_500ms_nostim_events")
         freq_pattern = "*500ms_stim_event_frequencies.csv"
 
-    sides: dict[str, dict[str, pd.DataFrame]] = {}
-    for side, suffix in zip(("target", "reference"), suffixes, strict=True):
-        key = f"{config.run_id}/events/{side}/{mode}"
-        combined = store.get_or_compute(
-            key,
-            pool_reference_events,
-            params={
-                "source_dir": str(source),
-                "suffix": suffix,
-                "active_only": config.histogram.active_only,
-                "exclude": ("TD1",),
-                "legacy_faithful": flag,
-            },
-            note="pooled reference event tables (ingest boundary)",
-        )
-        sides[side] = _split_events(combined)
-        keys_written.append(key)
+    regen_key, tag = _regenerate(
+        config, store, source=source, converted=converted, suffixes=suffixes
+    )
+    if regen_key is not None:
+        # the event source changes every downstream number: keep it in every
+        # key so reference and regenerated runs cache side by side
+        mode = f"{mode}_regen-{tag}"
+        keys_written.append(regen_key)
+
+    sides = _pool_sides(
+        config, store, source=source, suffixes=suffixes, mode=mode, regen_key=regen_key
+    )
+    keys_written.extend(f"{config.run_id}/events/{side}/{mode}" for side in sides)
 
     freq_key = f"{config.run_id}/frequencies"
     freq_combined = store.get_or_compute(
@@ -380,9 +508,112 @@ def run_onset_analysis(  # noqa: PLR0915 - the linear orchestration reads best u
     return {
         "trial_counts": counts,
         "modulation": proportions,
+        "mode": mode,
+        "modulated": modulated,
+        "events": sides,
+        "tables": tables,
         "stats": stats_frame,
         "keys": keys_written,
     }
+
+
+def _pool_sides(
+    config: CohortConfig,
+    store: ArtifactStore,
+    *,
+    source: Path,
+    suffixes: tuple[str, str],
+    mode: str,
+    regen_key: str | None,
+) -> dict[str, dict[str, pd.DataFrame]]:
+    """Store and split both sides' pooled events (reference or mixed source)."""
+    sides: dict[str, dict[str, pd.DataFrame]] = {}
+    for side, suffix in zip(("target", "reference"), suffixes, strict=True):
+        key = f"{config.run_id}/events/{side}/{mode}"
+        pool_params: dict[str, Any] = {
+            "source_dir": str(source),
+            "suffix": suffix,
+            "active_only": config.histogram.active_only,
+            "exclude": ("TD1",),
+            "legacy_faithful": config.legacy_faithful,
+        }
+        if regen_key is None:
+            combined = store.get_or_compute(
+                key,
+                pool_reference_events,
+                params=pool_params,
+                note="pooled reference event tables (ingest boundary)",
+            )
+        else:
+            combined = store.get_or_compute(
+                key,
+                pool_mixed_events,
+                inputs=[regen_key],
+                params={**pool_params, "side": side},
+                note="pooled event tables, regenerated groups replacing reference CSVs",
+            )
+        sides[side] = _split_events(combined)
+    return sides
+
+
+def _regenerate(
+    config: CohortConfig,
+    store: ArtifactStore,
+    *,
+    source: Path,
+    converted: Path,
+    suffixes: tuple[str, str],
+) -> tuple[str | None, str]:
+    """Store the re-detected events of the config's regenerated groups.
+
+    Only groups the published analysis included for this alignment (a
+    reference CSV exists for one of ``suffixes``) are regenerated: the
+    stimulus family has no passive tables, so a passive-only regeneration
+    leaves stimulus runs on the reference data. Returns the store key (or
+    ``None`` for a reference-source config or when no group applies) and the
+    short tag identifying the detection settings.
+
+    Raises
+    ------
+    ValueError
+        If a group has no regeneration recipe.
+    """
+    if config.event_source != "regenerated":
+        return None, ""
+    unknown = sorted(set(config.regenerated_groups) - set(GROUP_RECIPES))
+    if unknown:
+        raise ValueError(
+            f"no regeneration recipe for {unknown}; regenerable groups: {sorted(GROUP_RECIPES)}"
+        )
+    groups = sorted(
+        g
+        for g in config.regenerated_groups
+        if any((source / f"{g}{suffix}.csv").exists() for suffix in suffixes)
+    )
+    params = asdict(config.event_tables)
+    digest = json.dumps(
+        {"params": params, "groups": groups, "alignment": config.alignment}, sort_keys=True
+    )
+    tag = hashlib.sha256(digest.encode()).hexdigest()[:10]
+    if not groups:
+        return None, tag
+    key = f"regenerated/{config.alignment}/{tag}"
+    store.get_or_compute(
+        key,
+        regenerate_events,
+        params={
+            "converted_dir": str(converted),
+            "checksums": {
+                stem: compute_checksum(converted / f"{stem}.parquet") or "missing"
+                for stem in _regeneration_tables(groups)
+            },
+            "params": params,
+            "alignment": config.alignment,
+            "groups": groups,
+        },
+        note="events re-detected from the converted traces (ingest boundary)",
+    )
+    return key, tag
 
 
 def _modulation_lookup(counts: TrialCounts, protocol: str, roi_key: Any) -> tuple[int, int]:

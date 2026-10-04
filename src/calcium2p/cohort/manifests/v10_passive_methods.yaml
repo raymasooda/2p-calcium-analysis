@@ -1,0 +1,27 @@
+# V10 figure manifest with the passive event tables re-detected by the methods
+# rule -- the numbers the manuscript reports for the passive cohorts.
+#
+# The archived passive event CSVs were detected upstream with a wrong-axis
+# threshold (SD over a slice of trials instead of baseline frames; see
+# calcium2p.core.cohort_config.EventTableParams), which contradicts the methods
+# and cannot be recomputed. Here both passive groups are re-detected from the
+# V10 deltaF traces with the rule that regenerates the task cohorts exactly:
+# threshold = 2 x SD of each ROI's pooled 2-3 s pre-stimulus baseline over its
+# NAIVE STIM REW trials, >= 6 consecutive samples above it, onsets strictly
+# inside the 5-7 s reward window. Every other group still reads its reference
+# CSV, and the stimulus family has no passive tables, so only figures that
+# involve a passive group change.
+#
+# Every state, figure, test, and y-limit is inherited from v10_figures.yaml.
+
+base: v10_figures.yaml
+run_id_suffix: -passive-methods
+defaults:
+  event_source: regenerated
+  regenerated_groups: [passive_axons, passive_dendrites]
+  event_tables:
+    threshold_sd: 2.0
+    min_samples: 6
+    baseline_window_overrides:
+      passive_axons: [2.0, 3.0]
+      passive_dendrites: [2.0, 3.0]

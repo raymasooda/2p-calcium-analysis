@@ -29,7 +29,10 @@ if TYPE_CHECKING:
     from calcium2p.core.cohort_config import CohortConfig
 
 #: Manifests shipped with the package: name -> file under ``cohort/manifests/``.
-BUNDLED_MANIFESTS: dict[str, str] = {"v10": "v10_figures.yaml"}
+BUNDLED_MANIFESTS: dict[str, str] = {
+    "v10": "v10_figures.yaml",
+    "v10-passive-methods": "v10_passive_methods.yaml",
+}
 
 
 def bundled_manifest(name: str = "v10") -> Path:

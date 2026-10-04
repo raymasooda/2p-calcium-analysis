@@ -31,6 +31,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
     from typing import Self
 
 Metric = Literal["peak", "ev_onset", "peak_time", "ev_offset", "ev_duration", "integral", "rate"]
@@ -224,6 +225,11 @@ class EventTableParams:
     stim_window_s: tuple[float, float] = (3.0, 3.5)
     baseline_window_overrides: dict[str, tuple[float, float]] = field(default_factory=dict)
 
+    @classmethod
+    def from_mapping(cls, data: Mapping[str, Any]) -> Self:
+        """Build from a parsed mapping, coercing every window into a float pair."""
+        return cls(**_coerce_windows(dict(data)))
+
 
 @dataclass(frozen=True)
 class HistogramSpec:
@@ -253,7 +259,12 @@ class CohortConfig:
     event_source
         ``"reference"`` analyses the original event CSVs; ``"regenerated"``
         analyses tables rebuilt from the deltaF traces via
-        :class:`EventTableParams`.
+        :class:`EventTableParams` for the groups in
+        :attr:`regenerated_groups`, and the reference CSVs for the rest.
+    regenerated_groups
+        Event-table groups (``passive_axons``, ...) re-detected from the
+        traces when ``event_source`` is ``"regenerated"``; must be empty
+        otherwise. Groups whose traces are absent cannot be listed.
     data_subdir
         Location of the legacy inputs below ``DATA_ROOT``.
     datasets
@@ -268,6 +279,7 @@ class CohortConfig:
     alignment: Alignment
     legacy_faithful: bool = True
     event_source: EventSource = "reference"
+    regenerated_groups: tuple[str, ...] = ()
     data_subdir: str = "manuscript/V10"
     datasets: dict[str, str] = field(default_factory=dict)
     fps_by_cohort: dict[str, float] = field(default_factory=dict)
@@ -282,6 +294,12 @@ class CohortConfig:
         """Validate cross-references a type annotation cannot express."""
         if not self.run_id:
             raise CohortConfigError("run_id must be non-empty")
+        if (self.event_source == "regenerated") != bool(self.regenerated_groups):
+            raise CohortConfigError(
+                "regenerated_groups must be non-empty exactly when event_source is "
+                f"'regenerated' (got event_source={self.event_source!r}, "
+                f"regenerated_groups={list(self.regenerated_groups)})"
+            )
         names = [epoch.name for epoch in self.epochs]
         if len(names) != len(set(names)):
             raise CohortConfigError(f"duplicate epoch names in {names}")
@@ -325,11 +343,11 @@ class CohortConfig:
             if "modulation" in payload:
                 payload["modulation"] = ModulationSpec(**payload["modulation"])
             if "event_tables" in payload:
-                payload["event_tables"] = EventTableParams(
-                    **_coerce_windows(payload["event_tables"])
-                )
+                payload["event_tables"] = EventTableParams.from_mapping(payload["event_tables"])
             if "histogram" in payload:
                 payload["histogram"] = HistogramSpec(**payload["histogram"])
+            if "regenerated_groups" in payload:
+                payload["regenerated_groups"] = tuple(payload["regenerated_groups"])
             if "fps_by_cohort" in payload:
                 payload["fps_by_cohort"] = {
                     k: float(v) for k, v in payload["fps_by_cohort"].items()
@@ -435,22 +453,68 @@ def expand_figure_manifest(data: dict[str, Any]) -> tuple[CohortConfig, ...]:
     return tuple(configs)
 
 
+#: Keys a derived manifest (one with ``base``) may set.
+_DERIVED_MANIFEST_KEYS = frozenset({"base", "defaults", "run_id_suffix"})
+
+
+def _read_manifest_mapping(path: Path) -> dict[str, Any]:
+    """Read a manifest YAML into a mapping, resolving ``base`` inheritance.
+
+    A derived manifest names a ``base`` manifest (relative to its own file)
+    and inherits all of its states. Its ``defaults`` override the base's key
+    by key, and ``run_id_suffix`` is appended to every inherited run id so the
+    two manifests' artifacts never share store keys. A derived manifest cannot
+    add or edit states: it is the same set of figures under other defaults.
+    """
+    import yaml  # noqa: PLC0415
+
+    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        raise CohortConfigError(
+            f"{path}: top-level YAML must be a mapping, got {type(raw).__name__}"
+        )
+    if "base" not in raw:
+        return raw
+    unknown = sorted(set(raw) - _DERIVED_MANIFEST_KEYS)
+    if unknown:
+        raise CohortConfigError(
+            f"{path}: a derived manifest may only set {sorted(_DERIVED_MANIFEST_KEYS)}; "
+            f"got {unknown}"
+        )
+    suffix = raw.get("run_id_suffix", "")
+    if not isinstance(suffix, str) or not suffix:
+        raise CohortConfigError(f"{path}: a derived manifest needs a non-empty run_id_suffix")
+    base = _read_manifest_mapping(path.parent / str(raw["base"]))
+    overrides = raw.get("defaults", {})
+    if not isinstance(overrides, dict):
+        raise CohortConfigError(f"{path}: 'defaults' must be a mapping")
+    states = base.get("states")
+    if not isinstance(states, list):
+        raise CohortConfigError(f"{path}: base manifest has no 'states' list")
+    return {
+        "defaults": {**base.get("defaults", {}), **overrides},
+        "states": [
+            {**state, "run_id": f"{state.get('run_id')}{suffix}"}
+            if isinstance(state, dict)
+            else state
+            for state in states
+        ],
+    }
+
+
 def load_figure_manifest(path: str | Path) -> tuple[CohortConfig, ...]:
     """Read a figure-manifest YAML; see :func:`expand_figure_manifest`.
+
+    A manifest may derive from another through ``base`` (see
+    :func:`_read_manifest_mapping`).
 
     Raises
     ------
     CohortConfigError
         If the file is not a mapping, or does not match the schema.
     """
-    import yaml  # noqa: PLC0415
-
     path = Path(path)
-    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
-    if not isinstance(raw, dict):
-        raise CohortConfigError(
-            f"{path}: top-level YAML must be a mapping, got {type(raw).__name__}"
-        )
+    raw = _read_manifest_mapping(path)
     try:
         return expand_figure_manifest(raw)
     except CohortConfigError as exc:

@@ -1,0 +1,260 @@
+{
+ "_about": "Per-figure statistics of the V10 comparison figures that involve a passive group, with both passive event tables re-detected by the methods rule (2 x SD of the pooled 2-3 s baseline, >= 6 samples; manifest v10-passive-methods). Recorded independently of the package's regeneration wiring: the re-detected tables were written in the reference CSV layout into a copy of the V10 inputs and run through the unchanged v10 manifest. Figures without a passive group equal v10_figure_stats.json.",
+ "figures": {
+  "Passive axons cRew vs. cHIT early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-peak-student-t-modulated-passive-methods",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 0.18022843469881797,
+   "n": [
+    115,
+    67
+   ],
+   "mean": [
+    5.556144759472633,
+    5.502986052057982
+   ],
+   "sem": [
+    0.02639206912365318,
+    0.025014920012725535
+   ]
+  },
+  "Passive axons cRew vs. cHIT early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated-passive-methods",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.002453497615578273,
+   "n": [
+    115,
+    67
+   ],
+   "mean": [
+    0.42962042788129745,
+    0.5271144278606966
+   ],
+   "sem": [
+    0.02270988446312476,
+    0.029517017327077094
+   ]
+  },
+  "Passive axons cRew vs. nRew early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated-passive-methods",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.3272719417644183,
+   "n": [
+    115,
+    131
+   ],
+   "mean": [
+    5.556144759472633,
+    5.504964498373991
+   ],
+   "sem": [
+    0.02639206912365318,
+    0.018063468067172607
+   ]
+  },
+  "Passive axons cRew vs. nRew early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated-passive-methods",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.9005716768172127,
+   "n": [
+    115,
+    131
+   ],
+   "mean": [
+    0.42962042788129745,
+    0.40596609497372854
+   ],
+   "sem": [
+    0.02270988446312476,
+    0.01792720024952446
+   ]
+  },
+  "Passive dendrites cRew vs. cHIT early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-student-t-active-pd62-passive-methods",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 5.147399207473553e-06,
+   "n": [
+    34,
+    9
+   ],
+   "mean": [
+    5.667179743184401,
+    5.255262264929834
+   ],
+   "sem": [
+    0.03804678427922941,
+    0.04972790711613515
+   ]
+  },
+  "Passive dendrites cRew vs. cHIT early reward rate.svg": {
+   "state": "v10-reward-rate-mannwhitney-active-pd62-passive-methods",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.6619686799898155,
+   "n": [
+    34,
+    9
+   ],
+   "mean": [
+    0.31746031746031744,
+    0.22592592592592592
+   ],
+   "sem": [
+    0.04225326204233986,
+    0.01245705930284603
+   ]
+  },
+  "Passive dendrites cRew vs. nRew early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-student-t-active-pd62-passive-methods",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 0.5553248661484191,
+   "n": [
+    34,
+    57
+   ],
+   "mean": [
+    5.667179743184401,
+    5.639453731309215
+   ],
+   "sem": [
+    0.03804678427922941,
+    0.028168805792155086
+   ]
+  },
+  "Passive dendrites cRew vs. nRew early reward rate.svg": {
+   "state": "v10-reward-rate-mannwhitney-active-pd62-passive-methods",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.15747320725274383,
+   "n": [
+    34,
+    57
+   ],
+   "mean": [
+    0.31746031746031744,
+    0.2825149996202628
+   ],
+   "sem": [
+    0.04225326204233986,
+    0.034000270786511515
+   ]
+  },
+  "Passive dendrites nRew vs. nHIT early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated-passive-methods",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.020855696684096356,
+   "n": [
+    28,
+    21
+   ],
+   "mean": [
+    0.38839285714285715,
+    0.17255892255892252
+   ],
+   "sem": [
+    0.05505428275397204,
+    0.016635868147868143
+   ]
+  },
+  "Passive_dendrites cRew vs. NO_DREADDs cHIT early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated-passive-methods",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.5494547191008933,
+   "n": [
+    22,
+    5
+   ],
+   "mean": [
+    0.3896103896103897,
+    0.25
+   ],
+   "sem": [
+    0.05521562890186347,
+    0.0
+   ]
+  },
+  "Passive_dendrites nRew vs. NO_DREADDs nHIT early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated-passive-methods",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.020855696684096356,
+   "n": [
+    28,
+    21
+   ],
+   "mean": [
+    0.38839285714285715,
+    0.17255892255892252
+   ],
+   "sem": [
+    0.05505428275397204,
+    0.016635868147868143
+   ]
+  },
+  "non-consecutive-normalized Passive axons cRew vs. cHIT early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-peak-student-t-modulated-passive-methods",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 0.002681802201543258,
+   "n": [
+    115,
+    67
+   ],
+   "mean": [
+    1.1013541769044028,
+    0.8697981036581418
+   ],
+   "sem": [
+    0.052265197273544624,
+    0.04325752155791516
+   ]
+  },
+  "non-consecutive-normalized Passive axons cRew vs. cHIT early reward rate.svg": {
+   "state": "v10-reward-ev-onset-rate-mannwhitney-modulated-passive-methods",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 9.783762758914209e-05,
+   "n": [
+    115,
+    67
+   ],
+   "mean": [
+    1.0582667695663097,
+    1.312318077661485
+   ],
+   "sem": [
+    0.055940347591328765,
+    0.07348635019189319
+   ]
+  },
+  "non-consecutive-normalized Passive dendrites cRew vs. cHIT early reward ev_onset.svg": {
+   "state": "v10-reward-ev-onset-student-t-active-pd62-passive-methods",
+   "test": "Student's t (scipy ttest_ind, equal_var=True)",
+   "p": 0.011761330396944568,
+   "n": [
+    34,
+    9
+   ],
+   "mean": [
+    1.0049164357393796,
+    0.9680230384042601
+   ],
+   "sem": [
+    0.006746537181074938,
+    0.009159915778378132
+   ]
+  },
+  "non-consecutive-normalized Passive dendrites cRew vs. cHIT early reward rate.svg": {
+   "state": "v10-reward-rate-mannwhitney-active-pd62-passive-methods",
+   "test": "Mann-Whitney U (scipy mannwhitneyu, two-sided)",
+   "p": 0.016728300075576977,
+   "n": [
+    34,
+    9
+   ],
+   "mean": [
+    1.1236936725024362,
+    1.4025381251999576
+   ],
+   "sem": [
+    0.1495611280786287,
+    0.07733287150872058
+   ]
+  }
+ }
+}
