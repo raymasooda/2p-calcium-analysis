@@ -42,6 +42,15 @@ def _v10_dirs() -> tuple[Path, Path] | None:
 
 DIRS = _v10_dirs()
 
+#: Figures whose Mann-Whitney p depends on float rounding: their per-ROI
+#: ev_onset means hold values tied on one platform and one ulp (4.4e-16) apart
+#: on another (x86-64 vs arm64 summation order), which changes scipy's tie
+#: correction. n, means and SEMs still match; p gets this absolute tolerance.
+TIE_SENSITIVE_P = {
+    "hM4D dendrites pre-CNO cHIT vs. nHIT stim ev_onset.svg": 0.02,
+    "hM4D dendrites post-CNO cHIT vs. nHIT stim ev_onset.svg": 0.005,
+}
+
 pytestmark = [
     pytest.mark.requires_data,
     pytest.mark.slow,
@@ -68,7 +77,11 @@ def test_figure_statistics(stats: pd.DataFrame, figure: str) -> None:
     pinned = PINNED[figure]
     row = stats.set_index("figure_file").loc[figure]
     assert row["state"] == pinned["state"]
-    assert row["p_value"] == pytest.approx(pinned["p"], rel=1e-9, abs=1e-15)
+    if figure in TIE_SENSITIVE_P:
+        assert row["p_value"] == pytest.approx(pinned["p"], abs=TIE_SENSITIVE_P[figure])
+        assert (row["p_value"] < 0.05) == (pinned["p"] < 0.05)
+    else:
+        assert row["p_value"] == pytest.approx(pinned["p"], rel=1e-9, abs=1e-15)
     if "n_pairs" in pinned:
         assert int(row["n_a"]) == pinned["n_pairs"]
         return
