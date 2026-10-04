@@ -345,8 +345,11 @@ def run_onset_analysis(  # noqa: PLR0915 - the linear orchestration reads best u
     Returns
     -------
     dict
-        Key results: trial counts, modulation table, per-comparison stats,
-        and the artifact keys written.
+        Key results: the key ``mode`` (legacy flag and event source), trial
+        counts, modulation table, modulated ROI keys per
+        protocol, the pooled events per side (``target``/``reference``) and
+        protocol, the converted tables, per-comparison stats, and the
+        artifact keys written.
     """
     base = data_root() / config.data_subdir
     source = source_dir if source_dir is not None else base
@@ -505,6 +508,10 @@ def run_onset_analysis(  # noqa: PLR0915 - the linear orchestration reads best u
     return {
         "trial_counts": counts,
         "modulation": proportions,
+        "mode": mode,
+        "modulated": modulated,
+        "events": sides,
+        "tables": tables,
         "stats": stats_frame,
         "keys": keys_written,
     }

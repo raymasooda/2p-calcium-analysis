@@ -136,3 +136,37 @@ def test_passive_methods_leaves_other_figures_unchanged(
             continue
         assert row.p_value == legacy.loc[row.figure_file, "p_value"], row.figure_file
         assert row.mean_a == legacy.loc[row.figure_file, "mean_a"], row.figure_file
+
+
+# -- Fig 4G: passive-axon lick vs Ca2+ latency regression ---------------------
+
+#: Harness record of the original figure (reward notebook cell 32).
+LEGACY_FIG4G = {"r": 0.2615272474698988, "p": 0.00013079040810485187, "n": 209}
+#: Same recipe on the methods-rule re-detected passive events.
+METHODS_FIG4G = {"r": 0.23407690040157622, "p": 0.0005393073657787408, "n": 215}
+FIG4G_STATE = "v10-reward-ev-onset-rate-mannwhitney-modulated"
+
+
+@pytest.mark.parametrize(
+    ("manifest", "expected"),
+    [("v10", LEGACY_FIG4G), ("v10-passive-methods", METHODS_FIG4G)],
+)
+def test_passive_latency_correlation(
+    tmp_path: Path, manifest: str, expected: dict[str, float]
+) -> None:
+    from calcium2p.cohort.latency import run_latency_correlation  # noqa: PLC0415
+
+    assert DIRS is not None
+    source, converted = DIRS
+    (config,) = [
+        c
+        for c in load_figure_manifest(bundled_manifest(manifest))
+        if c.run_id.startswith(FIG4G_STATE)
+    ]
+    out = run_latency_correlation(
+        config, ArtifactStore(tmp_path), source_dir=source, converted_dir=converted
+    )
+    result = out["result"]
+    assert result.r == pytest.approx(expected["r"], rel=1e-9)
+    assert result.p == pytest.approx(expected["p"], rel=1e-9)
+    assert result.n_points == expected["n"]
