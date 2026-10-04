@@ -227,3 +227,80 @@ class TestBundledV10Manifest:
 
         with pytest.raises(KeyError, match="no bundled manifest"):
             bundled_manifest("v99")
+
+
+class TestRegeneratedGroups:
+    def test_regenerated_source_needs_groups(self) -> None:
+        with pytest.raises(CohortConfigError, match="regenerated_groups"):
+            CohortConfig.from_mapping({**minimal_mapping(), "event_source": "regenerated"})
+
+    def test_reference_source_rejects_groups(self) -> None:
+        with pytest.raises(CohortConfigError, match="regenerated_groups"):
+            CohortConfig.from_mapping(
+                {**minimal_mapping(), "regenerated_groups": ["passive_axons"]}
+            )
+
+    def test_groups_load_as_tuple(self) -> None:
+        config = CohortConfig.from_mapping(
+            {
+                **minimal_mapping(),
+                "event_source": "regenerated",
+                "regenerated_groups": ["passive_axons"],
+            }
+        )
+        assert config.regenerated_groups == ("passive_axons",)
+
+
+class TestDerivedManifest:
+    def write(self, tmp_path: Path, derived: dict) -> Path:
+        (tmp_path / "base.yaml").write_text(yaml.safe_dump(manifest_mapping()), encoding="utf-8")
+        path = tmp_path / "derived.yaml"
+        path.write_text(yaml.safe_dump({"base": "base.yaml", **derived}), encoding="utf-8")
+        return path
+
+    def test_inherits_states_with_suffixed_run_ids(self, tmp_path: Path) -> None:
+        path = self.write(tmp_path, {"run_id_suffix": "-x", "defaults": {"data_subdir": "other"}})
+        configs = load_figure_manifest(path)
+        assert [c.run_id for c in configs] == ["state-a-x", "state-b-x"]
+        assert all(c.data_subdir == "other" for c in configs)
+        # state keys still win over the derived defaults
+        assert configs[1].legacy_faithful is False
+
+    def test_needs_a_suffix(self, tmp_path: Path) -> None:
+        with pytest.raises(CohortConfigError, match="run_id_suffix"):
+            load_figure_manifest(self.write(tmp_path, {}))
+
+    def test_cannot_add_states(self, tmp_path: Path) -> None:
+        path = self.write(tmp_path, {"run_id_suffix": "-x", "states": []})
+        with pytest.raises(CohortConfigError, match="derived manifest may only set"):
+            load_figure_manifest(path)
+
+
+class TestBundledPassiveMethodsManifest:
+    @pytest.fixture(scope="class")
+    def pair(self) -> tuple[tuple[CohortConfig, ...], tuple[CohortConfig, ...]]:
+        from calcium2p.cohort.manifest import bundled_manifest  # noqa: PLC0415
+
+        return (
+            load_figure_manifest(bundled_manifest("v10")),
+            load_figure_manifest(bundled_manifest("v10-passive-methods")),
+        )
+
+    def test_same_figures_as_v10(
+        self, pair: tuple[tuple[CohortConfig, ...], tuple[CohortConfig, ...]]
+    ) -> None:
+        legacy, methods = pair
+        assert [c.comparisons for c in legacy] == [c.comparisons for c in methods]
+        assert [f"{c.run_id}-passive-methods" for c in legacy] == [c.run_id for c in methods]
+
+    def test_passive_groups_use_the_methods_rule(
+        self, pair: tuple[tuple[CohortConfig, ...], tuple[CohortConfig, ...]]
+    ) -> None:
+        for config in pair[1]:
+            assert config.event_source == "regenerated"
+            assert config.regenerated_groups == ("passive_axons", "passive_dendrites")
+            assert config.event_tables.min_samples == 6
+            assert config.event_tables.baseline_window_overrides == {
+                "passive_axons": (2.0, 3.0),
+                "passive_dendrites": (2.0, 3.0),
+            }
