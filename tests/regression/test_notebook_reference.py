@@ -149,6 +149,16 @@ STIMULUS_STATS = {
     "hM4D dendrites post-CNO cHIT vs. nHIT": (76, 97, 0.2835, 3.306, 3.325),
 }
 
+#: Stimulus comparisons whose Mann-Whitney p depends on float rounding.
+#: Their per-ROI ev_onset means hold values that are tied on one platform and
+#: differ by one ulp (4.4e-16) on another (x86-64 vs arm64 summation order),
+#: which changes scipy's tie correction. n and means still match exactly; p is
+#: checked to this absolute tolerance instead of 4 decimals.
+STIMULUS_TIE_SENSITIVE_P = {
+    "hM4D dendrites pre-CNO cHIT vs. nHIT": 0.02,
+    "hM4D dendrites post-CNO cHIT vs. nHIT": 0.005,
+}
+
 
 def run(alignment: str, tmp_path: Path) -> dict[str, Any]:
     """Run one alignment through a throwaway store."""
@@ -208,7 +218,12 @@ class TestStimulusAlignment:
         for name, (n_a, n_b, p, mean_a, mean_b) in STIMULUS_STATS.items():
             row = stats.loc[name]
             assert (int(row["n_a"]), int(row["n_b"])) == (n_a, n_b), name
-            assert round(float(row["p_value"]), 4) == p, name
+            if name in STIMULUS_TIE_SENSITIVE_P:
+                tolerance = STIMULUS_TIE_SENSITIVE_P[name]
+                assert float(row["p_value"]) == pytest.approx(p, abs=tolerance), name
+                assert (float(row["p_value"]) < 0.05) == (p < 0.05), name
+            else:
+                assert round(float(row["p_value"]), 4) == p, name
             assert round(float(row["mean_a"]), 3) == mean_a, name
             assert round(float(row["mean_b"]), 3) == mean_b, name
 
